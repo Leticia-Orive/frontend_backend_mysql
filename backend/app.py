@@ -317,5 +317,113 @@ def delete_user(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ============ ENDPOINTS DE CATEGORÍAS ============
+
+# Obtener todas las categorías
+@app.route('/api/categories', methods=['GET'])
+def get_categories():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM categories ORDER BY name")
+        categories = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(categories), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Obtener una categoría por ID
+@app.route('/api/categories/<int:category_id>', methods=['GET'])
+def get_category(category_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM categories WHERE id = %s", (category_id,))
+        category = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if category:
+            return jsonify(category), 200
+        return jsonify({'error': 'Categoría no encontrada'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ============ ENDPOINTS DE PRODUCTOS ============
+
+# Obtener todos los productos
+@app.route('/api/products', methods=['GET'])
+def get_products():
+    try:
+        category_id = request.args.get('category_id')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        if category_id:
+            cur.execute("""
+                SELECT p.*, c.name as category_name 
+                FROM products p 
+                JOIN categories c ON p.category_id = c.id 
+                WHERE p.category_id = %s 
+                ORDER BY p.name
+            """, (category_id,))
+        else:
+            cur.execute("""
+                SELECT p.*, c.name as category_name 
+                FROM products p 
+                JOIN categories c ON p.category_id = c.id 
+                ORDER BY p.name
+            """)
+        
+        products = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(products), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Obtener un producto por ID
+@app.route('/api/products/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT p.*, c.name as category_name 
+            FROM products p 
+            JOIN categories c ON p.category_id = c.id 
+            WHERE p.id = %s
+        """, (product_id,))
+        product = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if product:
+            return jsonify(product), 200
+        return jsonify({'error': 'Producto no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Obtener productos por categoría
+@app.route('/api/categories/<int:category_id>/products', methods=['GET'])
+def get_products_by_category(category_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT p.*, c.name as category_name 
+            FROM products p 
+            JOIN categories c ON p.category_id = c.id 
+            WHERE p.category_id = %s 
+            ORDER BY p.name
+        """, (category_id,))
+        products = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(products), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

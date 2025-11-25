@@ -1,31 +1,94 @@
 <div class="home-container">
-  <div class="home-card">
-    <h1>🏠 Bienvenido a la Tienda Online</h1>
-    
-    <div class="user-info" *ngIf="currentUser">
-      <h2>Hola, {{ currentUser.name }}!</h2>
-      <p class="email">{{ currentUser.email }}</p>
-      <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
-        {{ currentUser.role === 'admin' ? 'Administrador' : 'Usuario' }}
-      </span>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>🛒 Tienda Online</h1>
+      <div class="header-actions">
+        <span *ngIf="currentUser" class="welcome-text">
+          Hola, {{ currentUser.name }}
+          <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
+            {{ currentUser.role === 'admin' ? 'Admin' : 'User' }}
+          </span>
+        </span>
+        <button 
+          *ngIf="currentUser?.role === 'admin'" 
+          class="btn-admin" 
+          (click)="goToUsers()">
+          👥 Usuarios
+        </button>
+        <button class="btn-logout" (click)="logout()">
+          🚪 Salir
+        </button>
+      </div>
     </div>
+  </header>
 
-    <div class="actions">
-      <button 
-        *ngIf="currentUser?.role === 'admin'" 
-        class="btn-primary" 
-        (click)="goToUsers()">
-        👥 Ver Usuarios
-      </button>
-      
-      <div *ngIf="currentUser?.role !== 'admin'" class="info-box">
-        <p>Como usuario estándar, no tienes acceso a la gestión de usuarios.</p>
-        <p>Solo los administradores pueden ver y gestionar usuarios.</p>
+  <!-- Category Filter -->
+  <div class="category-filter">
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedCategory === null"
+      (click)="filterByCategory(null)">
+      Todas
+    </button>
+    <button 
+      *ngFor="let category of categories"
+      class="filter-btn" 
+      [class.active]="selectedCategory === category.id"
+      (click)="filterByCategory(category.id)">
+      {{ category.name }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Products by Category -->
+  <div *ngIf="!loading && !error" class="products-container">
+    <div *ngFor="let category of getFilteredCategories()" class="category-section">
+      <div class="category-header">
+        <img [src]="category.image_url" [alt]="category.name" class="category-image">
+        <div class="category-info">
+          <h2>{{ category.name }}</h2>
+          <p>{{ category.description }}</p>
+        </div>
       </div>
 
-      <button class="btn-logout" (click)="logout()">
-        🚪 Cerrar Sesión
-      </button>
+      <div *ngIf="productsByCategory[category.id]?.length === 0" class="no-products">
+        No hay productos en esta categoría
+      </div>
+
+      <div class="products-grid">
+        <div *ngFor="let product of productsByCategory[category.id]" class="product-card">
+          <div class="product-image-container">
+            <img [src]="product.image_url" [alt]="product.name" class="product-image">
+            <span *ngIf="product.stock === 0" class="out-of-stock">Agotado</span>
+            <span *ngIf="product.stock > 0 && product.stock < 10" class="low-stock">Últimas unidades</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description }}</p>
+            <div class="product-footer">
+              <span class="product-price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="product-stock">Stock: {{ product.stock }}</span>
+            </div>
+            <button 
+              class="btn-add-cart" 
+              [disabled]="product.stock === 0"
+              [class.disabled]="product.stock === 0">
+              {{ product.stock === 0 ? 'Agotado' : '🛒 Añadir' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
