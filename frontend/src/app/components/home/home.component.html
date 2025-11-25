@@ -66,6 +66,13 @@
         No hay productos en esta categoría
       </div>
 
+      <!-- Add Product Button for Admin -->
+      <div *ngIf="isAdmin()" class="add-product-section">
+        <button class="btn-add-product" (click)="openCreateProductForm()">
+          ➕ Añadir Nuevo Producto a {{ category.name }}
+        </button>
+      </div>
+
       <div class="products-grid">
         <div *ngFor="let product of productsByCategory[category.id]" class="product-card">
           <div class="product-image-container">
@@ -80,13 +87,122 @@
               <span class="product-price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</span>
               <span class="product-stock">Stock: {{ product.stock }}</span>
             </div>
+            
+            <!-- Admin Buttons -->
+            <div *ngIf="isAdmin()" class="admin-buttons">
+              <button class="btn-edit" (click)="openEditProductForm(product)">
+                ✏️ Editar
+              </button>
+              <button class="btn-delete" (click)="deleteProduct(product)">
+                🗑️ Eliminar
+              </button>
+            </div>
+            
+            <!-- User Add to Cart Button -->
             <button 
               class="btn-add-cart" 
               [disabled]="product.stock === 0"
-              [class.disabled]="product.stock === 0">
-              {{ product.stock === 0 ? 'Agotado' : '🛒 Añadir' }}
+              [class.disabled]="product.stock === 0"
+              (click)="addToCart(product)">
+              {{ product.stock === 0 ? 'Agotado' : '🛒 Añadir al Carrito' }}
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Form Modal (Admin Only) -->
+  <div *ngIf="showProductForm" class="modal-overlay" (click)="closeProductForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>{{ isEditingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+      
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="currentProduct.name" placeholder="Nombre del producto">
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="currentProduct.description" placeholder="Descripción del producto"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio (€) *</label>
+          <input type="number" [(ngModel)]="currentProduct.price" placeholder="0.00" step="0.01">
+        </div>
+
+        <div class="form-group">
+          <label>Stock *</label>
+          <input type="number" [(ngModel)]="currentProduct.stock" placeholder="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Categoría *</label>
+        <select [(ngModel)]="currentProduct.category_id">
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>URL de la Imagen</label>
+        <input type="text" [(ngModel)]="currentProduct.image_url" placeholder="https://...">
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="closeProductForm()">Cancelar</button>
+        <button class="btn-save" (click)="saveProduct()">
+          {{ isEditingProduct ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping Cart Button -->
+  <div class="cart-button" *ngIf="cart.length > 0">
+    <button class="btn-cart" (click)="showCart = !showCart">
+      🛒 Carrito ({{ cart.length }})
+      <span class="cart-total">{{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+    </button>
+  </div>
+
+  <!-- Cart Modal -->
+  <div *ngIf="showCart" class="modal-overlay" (click)="showCart = false">
+    <div class="modal-content cart-modal" (click)="$event.stopPropagation()">
+      <h2>🛒 Mi Carrito</h2>
+      
+      <div *ngIf="cart.length === 0" class="empty-cart">
+        El carrito está vacío
+      </div>
+
+      <div *ngIf="cart.length > 0" class="cart-items">
+        <div *ngFor="let item of cart; let i = index" class="cart-item">
+          <img [src]="item.product.image_url" [alt]="item.product.name">
+          <div class="cart-item-info">
+            <h4>{{ item.product.name }}</h4>
+            <p>{{ item.product.price | currency:'EUR':'symbol':'1.2-2' }}</p>
+          </div>
+          <div class="cart-item-quantity">
+            <button (click)="updateQuantity(i, item.quantity - 1)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="updateQuantity(i, item.quantity + 1)">+</button>
+          </div>
+          <div class="cart-item-total">
+            {{ (item.product.price * item.quantity) | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+          <button class="btn-remove" (click)="removeFromCart(i)">🗑️</button>
+        </div>
+      </div>
+
+      <div *ngIf="cart.length > 0" class="cart-footer">
+        <div class="cart-total-section">
+          <h3>Total: {{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}</h3>
+        </div>
+        <div class="cart-actions">
+          <button class="btn-clear" (click)="clearCart()">Vaciar Carrito</button>
+          <button class="btn-checkout">Proceder al Pago</button>
         </div>
       </div>
     </div>

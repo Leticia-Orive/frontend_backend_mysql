@@ -425,5 +425,91 @@ def get_products_by_category(category_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Crear un nuevo producto (solo administradores)
+@app.route('/api/products', methods=['POST'])
+@admin_required
+def create_product(current_user_id):
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        description = data.get('description')
+        price = data.get('price')
+        stock = data.get('stock', 0)
+        image_url = data.get('image_url')
+        category_id = data.get('category_id')
+        
+        if not name or not price or not category_id:
+            return jsonify({'error': 'Nombre, precio y categoría son requeridos'}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO products (name, description, price, stock, image_url, category_id) VALUES (%s, %s, %s, %s, %s, %s)",
+            (name, description, price, stock, image_url, category_id)
+        )
+        conn.commit()
+        product_id = cur.lastrowid
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Producto creado exitosamente',
+            'id': product_id
+        }), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Actualizar un producto (solo administradores)
+@app.route('/api/products/<int:product_id>', methods=['PUT'])
+@admin_required
+def update_product(current_user_id, product_id):
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        description = data.get('description')
+        price = data.get('price')
+        stock = data.get('stock')
+        image_url = data.get('image_url')
+        category_id = data.get('category_id')
+        
+        if not name or not price or not category_id:
+            return jsonify({'error': 'Nombre, precio y categoría son requeridos'}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE products SET name = %s, description = %s, price = %s, stock = %s, image_url = %s, category_id = %s WHERE id = %s",
+            (name, description, price, stock, image_url, category_id, product_id)
+        )
+        conn.commit()
+        affected_rows = cur.rowcount
+        cur.close()
+        conn.close()
+        
+        if affected_rows > 0:
+            return jsonify({'message': 'Producto actualizado exitosamente'}), 200
+        return jsonify({'error': 'Producto no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Eliminar un producto (solo administradores)
+@app.route('/api/products/<int:product_id>', methods=['DELETE'])
+@admin_required
+def delete_product(current_user_id, product_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
+        conn.commit()
+        affected_rows = cur.rowcount
+        cur.close()
+        conn.close()
+        
+        if affected_rows > 0:
+            return jsonify({'message': 'Producto eliminado exitosamente'}), 200
+        return jsonify({'error': 'Producto no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
