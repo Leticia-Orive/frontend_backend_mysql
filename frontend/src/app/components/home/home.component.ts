@@ -49,7 +49,7 @@ export class HomeComponent implements OnInit {
       this.currentUser = user;
     });
     this.loadCategories();
-    this.loadCart();
+    // No cargar el carrito automáticamente
   }
 
   loadCategories(): void {
@@ -223,15 +223,13 @@ export class HomeComponent implements OnInit {
   }
 
   saveCart(): void {
-    localStorage.setItem('cart', JSON.stringify(this.cart));
+    // No guardar en localStorage
   }
 
   loadCart(): void {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      this.cart = JSON.parse(savedCart);
-      this.calculateTotal();
-    }
+    // Cart no se carga automáticamente desde localStorage
+    this.cart = [];
+    this.calculateTotal();
   }
 
   clearCart(): void {
