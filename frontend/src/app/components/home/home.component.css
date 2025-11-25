@@ -694,15 +694,115 @@
   margin-top: 20px;
 }
 
+.cart-coupon-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cart-coupon-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.coupon-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.coupon-input-group input {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.coupon-input-group input:disabled {
+  background: #e9ecef;
+  cursor: not-allowed;
+}
+
+.btn-apply-coupon {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-apply-coupon:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.btn-apply-coupon:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-remove-coupon {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-remove-coupon:hover {
+  background: #c82333;
+}
+
+.coupon-applied {
+  margin: 10px 0 0 0;
+  color: #28a745;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
 .cart-total-section {
-  text-align: right;
   margin-bottom: 20px;
 }
 
-.cart-total-section h3 {
-  margin: 0;
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.total-line.discount {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.total-line.total {
+  border-top: 2px solid #667eea;
+  margin-top: 10px;
+  padding-top: 15px;
+  font-size: 1.3rem;
   color: #667eea;
-  font-size: 1.5rem;
+}
+
+.register-promo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .cart-actions {

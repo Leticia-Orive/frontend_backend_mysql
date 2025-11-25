@@ -31,7 +31,15 @@ export class HomeComponent implements OnInit {
   // Cart
   cart: { product: Product; quantity: number }[] = [];
   cartTotal = 0;
+  cartSubtotal = 0;
+  cartDiscount = 0;
   showCart = false;
+  
+  // Discounts and coupons
+  userDiscount = 0.10; // 10% discount for registered users
+  couponCode = '';
+  appliedCoupon: string | null = null;
+  couponDiscount = 0;
   
   // Product detail view
   showProductDetail = false;
@@ -219,7 +227,22 @@ export class HomeComponent implements OnInit {
   }
 
   calculateTotal(): void {
-    this.cartTotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    this.cartSubtotal = this.cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    
+    // Apply discount for registered users
+    if (this.currentUser) {
+      this.cartDiscount = this.cartSubtotal * this.userDiscount;
+    } else {
+      this.cartDiscount = 0;
+    }
+    
+    // Apply coupon discount
+    let couponAmount = 0;
+    if (this.appliedCoupon) {
+      couponAmount = this.couponDiscount;
+    }
+    
+    this.cartTotal = this.cartSubtotal - this.cartDiscount - couponAmount;
   }
 
   saveCart(): void {
@@ -238,9 +261,40 @@ export class HomeComponent implements OnInit {
     this.calculateTotal();
   }
 
+  applyCoupon(): void {
+    const validCoupons: { [key: string]: number } = {
+      'BIENVENIDO10': 10,
+      'DESCUENTO20': 20,
+      'VERANO15': 15
+    };
+    
+    const couponUpper = this.couponCode.toUpperCase();
+    
+    if (validCoupons[couponUpper]) {
+      this.appliedCoupon = couponUpper;
+      this.couponDiscount = validCoupons[couponUpper];
+      this.calculateTotal();
+      alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+    } else {
+      alert('Cupón inválido');
+    }
+  }
+  
+  removeCoupon(): void {
+    this.appliedCoupon = null;
+    this.couponDiscount = 0;
+    this.couponCode = '';
+    this.calculateTotal();
+  }
+
   proceedToCheckout(): void {
-    // Aquí iría la lógica de checkout
-    alert('Funcionalidad de pago en desarrollo');
+    if (!this.currentUser) {
+      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nTotal: €${this.cartTotal.toFixed(2)}\n\n¡Regístrate para obtener un 10% de descuento en todas tus compras y acceso a cupones exclusivos!`;
+      alert(message);
+    } else {
+      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total: €${this.cartTotal.toFixed(2)}\n\n¡Gracias por ser parte de nuestra comunidad!`;
+      alert(message);
+    }
   }
 
   logout(): void {

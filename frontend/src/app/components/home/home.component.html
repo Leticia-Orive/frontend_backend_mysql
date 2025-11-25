@@ -282,9 +282,60 @@
       </div>
 
       <div *ngIf="cart.length > 0" class="cart-footer">
-        <div class="cart-total-section">
-          <h3>Total: {{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}</h3>
+        <!-- Coupon Section -->
+        <div class="cart-coupon-section">
+          <h4>¿Tienes un cupón?</h4>
+          <div class="coupon-input-group">
+            <input 
+              type="text" 
+              [(ngModel)]="couponCode" 
+              placeholder="Ingresa tu cupón"
+              [disabled]="appliedCoupon !== null"
+            >
+            <button 
+              *ngIf="!appliedCoupon" 
+              class="btn-apply-coupon" 
+              (click)="applyCoupon()"
+              [disabled]="!couponCode"
+            >
+              Aplicar
+            </button>
+            <button 
+              *ngIf="appliedCoupon" 
+              class="btn-remove-coupon" 
+              (click)="removeCoupon()"
+            >
+              Eliminar
+            </button>
+          </div>
+          <p *ngIf="appliedCoupon" class="coupon-applied">
+            ✓ Cupón {{ appliedCoupon }} aplicado
+          </p>
         </div>
+
+        <!-- Total Section -->
+        <div class="cart-total-section">
+          <div class="total-line">
+            <span>Subtotal:</span>
+            <span>{{ cartSubtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div *ngIf="currentUser" class="total-line discount">
+            <span>🎁 Descuento usuario (10%):</span>
+            <span>-{{ cartDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div *ngIf="appliedCoupon" class="total-line discount">
+            <span>🎟️ Cupón {{ appliedCoupon }}:</span>
+            <span>-{{ couponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="total-line total">
+            <span><strong>Total:</strong></span>
+            <span><strong>{{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+          </div>
+          <div *ngIf="!currentUser" class="register-promo">
+            💡 ¡Regístrate y obtén 10% de descuento en todas tus compras!
+          </div>
+        </div>
+
         <div class="cart-actions">
           <button class="btn-clear" (click)="clearCart()">Vaciar Carrito</button>
           <button class="btn-checkout" (click)="proceedToCheckout()">Proceder al Pago</button>
