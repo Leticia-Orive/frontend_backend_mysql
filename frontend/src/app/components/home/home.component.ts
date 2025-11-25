@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
@@ -11,7 +11,7 @@ import { Product } from '../../models/product.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -238,6 +238,11 @@ export class HomeComponent implements OnInit {
     this.cart = [];
     this.saveCart();
     this.calculateTotal();
+  }
+
+  proceedToCheckout(): void {
+    // Aquí iría la lógica de checkout
+    alert('Funcionalidad de pago en desarrollo');
   }
 
   logout(): void {

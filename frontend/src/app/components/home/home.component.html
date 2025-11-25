@@ -4,21 +4,34 @@
     <div class="header-content">
       <h1>🛒 Tienda Online</h1>
       <div class="header-actions">
-        <span *ngIf="currentUser" class="welcome-text">
-          Hola, {{ currentUser.name }}
-          <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
-            {{ currentUser.role === 'admin' ? 'Admin' : 'User' }}
+        <!-- Not logged in -->
+        <div *ngIf="!currentUser" class="auth-buttons">
+          <button class="btn-login" routerLink="/login">
+            🔐 Iniciar Sesión
+          </button>
+          <button class="btn-register" routerLink="/register">
+            📝 Registrarse
+          </button>
+        </div>
+        
+        <!-- Logged in -->
+        <div *ngIf="currentUser" class="user-section">
+          <span class="welcome-text">
+            Hola, {{ currentUser.name }}
+            <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
+              {{ currentUser.role === 'admin' ? 'Admin' : 'User' }}
+            </span>
           </span>
-        </span>
-        <button 
-          *ngIf="currentUser?.role === 'admin'" 
-          class="btn-admin" 
-          (click)="goToUsers()">
-          👥 Usuarios
-        </button>
-        <button class="btn-logout" (click)="logout()">
-          🚪 Salir
-        </button>
+          <button 
+            *ngIf="currentUser?.role === 'admin'" 
+            class="btn-admin" 
+            (click)="goToUsers()">
+            👥 Usuarios
+          </button>
+          <button class="btn-logout" (click)="logout()">
+            🚪 Salir
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -98,8 +111,8 @@
               </button>
             </div>
             
-            <!-- User Buttons -->
-            <div *ngIf="!isAdmin()" class="user-buttons">
+            <!-- User Buttons (only when logged in and not admin) -->
+            <div *ngIf="currentUser && !isAdmin()" class="user-buttons">
               <button class="btn-view-product" (click)="viewProduct(product)">
                 👁️ Ver Producto
               </button>
@@ -274,7 +287,7 @@
         </div>
         <div class="cart-actions">
           <button class="btn-clear" (click)="clearCart()">Vaciar Carrito</button>
-          <button class="btn-checkout">Proceder al Pago</button>
+          <button class="btn-checkout" (click)="proceedToCheckout()">Proceder al Pago</button>
         </div>
       </div>
     </div>
