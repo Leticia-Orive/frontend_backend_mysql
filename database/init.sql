@@ -1,6 +1,6 @@
 -- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS tienda_online;
-USE tienda_online;
+CREATE DATABASE IF NOT EXISTS tiendas_online;
+USE tiendas_online;
 
 -- Crear tabla de usuarios
 CREATE TABLE IF NOT EXISTS users (

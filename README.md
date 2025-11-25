@@ -1,10 +1,10 @@
-# Tienda Online - Full Stack Application
+# Tiendas Online - Full Stack Application
 
-Aplicación completa de tienda online con frontend en Angular 19, backend en Python con Flask, y base de datos MySQL.
+Aplicación completa de tienda online con frontend en Angular 19, backend en Python con Flask, y base de datos MySQL (sin Docker).
 
 ## 🛒 Descripción del Proyecto
 
-Sistema de gestión de tienda online que permite administrar usuarios, productos y pedidos.
+Sistema de gestión de tienda online que permite administrar usuarios con roles (admin/user), autenticación JWT y operaciones CRUD completas.
 
 ## 📋 Requisitos Previos
 
@@ -13,7 +13,7 @@ Sistema de gestión de tienda online que permite administrar usuarios, productos
 - **MySQL** 8.0+
 - **Angular CLI** 19
 
-## 🚀 Instalación y Ejecución
+## 🚀 Instalación y Ejecución (Sin Docker)
 
 ### 1. Clonar el Repositorio
 
@@ -24,22 +24,31 @@ cd frontend_backend_mysql
 
 ### 2. Base de Datos MySQL
 
-La base de datos se llama `tienda_online` y ya está configurada.
+La base de datos se llama `tiendas_online`. Debes crearla manualmente.
 
-```bash
-# Ejecutar el script de inicialización:
-Get-Content database\init.sql | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p123456
+#### Opción A: Desde la línea de comandos (PowerShell)
+
+```powershell
+# Ejecutar el script de inicialización (ajusta la ruta de mysql.exe según tu instalación):
+Get-Content database\init.sql | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p
 ```
 
-O usando MySQL Workbench:
+#### Opción B: Usando MySQL Workbench
+
 1. Abre MySQL Workbench
 2. Conecta con tu servidor local (localhost)
 3. Abre el archivo `database/init.sql`
-4. Ejecuta el script
+4. Ejecuta el script completo (Ctrl + Shift + Enter)
+
+#### Opción C: Desde MySQL CLI
+
+```bash
+mysql -u root -p < database\init.sql
+```
 
 ### 3. Backend (Python Flask)
 
-```bash
+```powershell
 cd backend
 
 # Crear entorno virtual
@@ -51,10 +60,9 @@ py -m venv venv
 # Instalar dependencias
 pip install -r requirements.txt
 
-# El archivo .env ya está configurado con:
-# DB_NAME=tienda_online
-# DB_USER=root
-# DB_PASSWORD=123456
+# Configurar variables de entorno
+# Edita el archivo .env y ajusta la contraseña de MySQL si es necesario:
+# DB_PASSWORD=tu_contraseña_mysql
 
 # Ejecutar servidor
 py app.py
@@ -66,7 +74,7 @@ El backend estará disponible en: **http://localhost:5000**
 
 Abre una nueva terminal:
 
-```bash
+```powershell
 cd frontend
 
 # Instalar dependencias (solo la primera vez)
@@ -83,200 +91,143 @@ El frontend estará disponible en: **http://localhost:4200**
 ```
 frontend_backend_mysql/
 ├── backend/                 # Backend Python Flask
-│   ├── app.py              # Aplicación principal
+│   ├── app.py              # Aplicación principal con API REST
 │   ├── requirements.txt    # Dependencias Python
-│   ├── .env               # Configuración (DB: tienda_online)
-│   └── venv/              # Entorno virtual
+│   ├── .env               # Configuración (DB: tiendas_online)
+│   └── venv/              # Entorno virtual (creado al instalar)
 ├── database/              # Scripts de base de datos
-│   ├── init.sql          # Script de inicialización
-│   └── COMO_EJECUTAR.md  # Guía detallada
+│   └── init.sql          # Script de inicialización MySQL
 ├── frontend/             # Frontend Angular 19
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/
-│   │   │   │   └── user-list/
+│   │   │   │   ├── login/      # Componente de login
+│   │   │   │   ├── register/   # Componente de registro
+│   │   │   │   └── user-list/  # Componente lista de usuarios
+│   │   │   ├── guards/
+│   │   │   │   └── auth.guard.ts  # Guardia de autenticación
 │   │   │   ├── models/
-│   │   │   │   └── user.model.ts
+│   │   │   │   └── user.model.ts  # Modelo de usuario
 │   │   │   ├── services/
-│   │   │   │   └── user.service.ts
-│   │   │   └── app.component.ts
+│   │   │   │   ├── auth.service.ts  # Servicio de autenticación
+│   │   │   │   └── user.service.ts  # Servicio de usuarios
+│   │   │   ├── app.component.ts
+│   │   │   ├── app.config.ts
+│   │   │   └── app.routes.ts
 │   │   ├── index.html
-│   │   └── main.ts
+│   │   ├── main.ts
+│   │   └── styles.css
 │   ├── angular.json
 │   ├── package.json
-│   └── node_modules/
-└── README.md
+│   └── tsconfig.json
+└── README.md             # Este archivo
 ```
+
+## 🔑 Usuarios de Prueba
+
+Después de ejecutar el script `init.sql`, tendrás estos usuarios de prueba:
+
+| Email | Password | Rol |
+|-------|----------|-----|
+| admin@example.com | 123456 | admin |
+| juan.perez@example.com | 123456 | user |
+| maria.garcia@example.com | 123456 | user |
+| carlos.lopez@example.com | 123456 | user |
+| ana.martinez@example.com | 123456 | user |
 
 ## 🔌 API Endpoints
 
-### Base URL: `http://localhost:5000`
+### Autenticación
+- **POST** `/api/register` - Registrar nuevo usuario
+- **POST** `/api/login` - Iniciar sesión
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/` | Estado del servidor |
-| GET | `/api/users` | Obtener todos los usuarios |
-| GET | `/api/users/:id` | Obtener un usuario por ID |
-| POST | `/api/users` | Crear un nuevo usuario |
-| PUT | `/api/users/:id` | Actualizar un usuario |
-| DELETE | `/api/users/:id` | Eliminar un usuario |
+### Usuarios (Requieren autenticación)
+- **GET** `/api/users` - Listar todos los usuarios
+- **GET** `/api/users/{id}` - Obtener un usuario por ID
+- **PUT** `/api/users/{id}` - Actualizar un usuario
+- **DELETE** `/api/users/{id}` - Eliminar un usuario
 
-### Ejemplo de petición POST:
-```json
-{
-  "name": "María González",
-  "email": "maria@example.com"
-}
+## ⚙️ Configuración
+
+### Backend (.env)
+
+El archivo `backend/.env` contiene la configuración de la base de datos:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=          # Ajusta según tu configuración
+DB_NAME=tiendas_online
+DB_PORT=3306
+JWT_SECRET=mi_clave_secreta_super_segura_123456
 ```
+
+**IMPORTANTE**: Ajusta `DB_PASSWORD` con la contraseña de tu usuario root de MySQL.
+
+### Frontend
+
+El frontend está configurado para conectarse al backend en `http://localhost:5000`.
+Si cambias el puerto del backend, actualiza las URLs en los servicios de Angular.
 
 ## 🛠️ Tecnologías Utilizadas
 
 ### Frontend
-- **Angular 19** - Framework web moderno
-- **TypeScript 5.6** - Lenguaje tipado
-- **RxJS** - Programación reactiva
-- **CSS3** - Estilos responsive
+- Angular 19
+- TypeScript 5.6
+- RxJS 7.8
+- Angular Router
+- HTTP Client
 
 ### Backend
-- **Python 3.13** - Lenguaje de programación
-- **Flask 3.0** - Micro-framework web
-- **PyMySQL** - Conector MySQL puro Python
-- **Flask-CORS** - Manejo de peticiones cross-origin
-- **python-dotenv** - Variables de entorno
+- Python 3.x
+- Flask 3.0
+- PyMySQL 1.1
+- Flask-CORS 4.0
+- PyJWT 2.8
+- bcrypt 4.1
+- python-dotenv 1.0
 
 ### Base de Datos
-- **MySQL 8.0** - Sistema de gestión de base de datos relacional
-
-## 💡 Características
-
-✅ CRUD completo de usuarios  
-✅ Interfaz moderna y responsive con gradientes  
-✅ API RESTful con Flask  
-✅ Validación de formularios  
-✅ Manejo de errores robusto  
-✅ Modal para crear/editar usuarios  
-✅ Confirmación antes de eliminar  
-✅ **Sin Docker** - instalación nativa  
-✅ Base de datos MySQL `tienda_online`  
-
-## 🔧 Comandos Útiles
-
-### Backend
-```bash
-# Activar entorno virtual
-.\venv\Scripts\Activate.ps1
-
-# Instalar nueva dependencia
-pip install nombre-paquete
-pip freeze > requirements.txt
-
-# Ejecutar servidor
-py app.py
-```
-
-### Frontend
-```bash
-# Compilar para producción
-npm run build
-
-# Ejecutar tests
-npm test
-
-# Generar nuevo componente
-ng generate component nombre-componente
-
-# Generar nuevo servicio
-ng generate service nombre-servicio
-```
-
-### Base de Datos
-```sql
--- Conectar a MySQL
-USE tienda_online;
-
--- Ver usuarios
-SELECT * FROM users;
-
--- Contar usuarios
-SELECT COUNT(*) FROM users;
-
--- Limpiar tabla
-TRUNCATE TABLE users;
-```
+- MySQL 8.0
 
 ## 🐛 Solución de Problemas
 
-### Backend no inicia
-- Verifica que el entorno virtual esté activado: `.\venv\Scripts\Activate.ps1`
-- Verifica que MySQL esté corriendo
-- Revisa las credenciales en `.env`
+### El backend no conecta con MySQL
 
-### Error de conexión a MySQL
-- Verifica que MySQL Server esté ejecutándose
-- Comprueba usuario y contraseña en `backend/.env`
-- Verifica que la base de datos `tienda_online` exista
+1. Verifica que MySQL esté ejecutándose:
+   ```powershell
+   Get-Service MySQL80  # O el nombre de tu servicio MySQL
+   ```
 
-### Frontend no se conecta al backend
-- Asegúrate de que el backend esté corriendo en el puerto 5000
-- Verifica CORS en `app.py` (ya está configurado)
-- Revisa la consola del navegador para errores
+2. Verifica las credenciales en `backend/.env`
 
-### Error al instalar dependencias Python en Windows
-Si tienes problemas con `mysqlclient`, este proyecto usa `PyMySQL` que no requiere compilación.
+3. Asegúrate de que la base de datos `tiendas_online` existe:
+   ```sql
+   SHOW DATABASES;
+   ```
 
-## 📝 Configuración
+### Error al instalar dependencias de Python
 
-### Variables de Entorno (backend/.env)
-```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=123456
-DB_NAME=tienda_online
-DB_PORT=3306
-PORT=3000
-JWT_SECRET=mi_clave_secreta_super_segura_123456
+Si tienes problemas con bcrypt o cryptography:
+```powershell
+pip install --upgrade pip
+pip install wheel
+pip install -r requirements.txt
 ```
 
-### Puerto del Frontend
-Por defecto Angular corre en el puerto 4200. Para cambiarlo:
-```bash
-ng serve --port 4300
-```
+### El frontend no se conecta al backend
 
-### Puerto del Backend
-Por defecto Flask corre en el puerto 5000. Para cambiarlo, edita `app.py`:
-```python
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
-```
+1. Verifica que el backend esté corriendo en http://localhost:5000
+2. Verifica la consola del navegador para errores CORS
+3. Asegúrate de que Flask-CORS esté instalado correctamente
 
-## 🚦 Estado del Proyecto
+## 📝 Notas
 
-✅ Base de datos MySQL configurada con `tienda_online`  
-✅ Backend Python Flask funcionando  
-✅ Frontend Angular 19 listo  
-✅ API RESTful completa  
-✅ CRUD de usuarios implementado  
-✅ Sin Docker - instalación nativa  
+- Este proyecto NO usa Docker, todo se ejecuta de forma nativa en Windows
+- Asegúrate de tener MySQL instalado y corriendo antes de iniciar el backend
+- El backend usa variables de entorno del archivo `.env`
+- La contraseña por defecto de todos los usuarios de prueba es `123456`
 
-## 👥 Autor
+## 📧 Contacto
 
-**Leticia Orive**
-- GitHub: [@Leticia-Orive](https://github.com/Leticia-Orive)
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
----
-
-## 🎯 Próximos Pasos
-
-Para expandir este proyecto puedes:
-- Agregar gestión de productos
-- Implementar carrito de compras
-- Añadir autenticación con JWT
-- Crear panel de administración
-- Agregar categorías de productos
-- Implementar sistema de pagos
-- Añadir imágenes de productos
+Para preguntas o sugerencias, contacta a: Leticia Orive
