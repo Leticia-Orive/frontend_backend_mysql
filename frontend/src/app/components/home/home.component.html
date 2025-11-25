@@ -98,7 +98,14 @@
               </button>
             </div>
             
-            <!-- User Add to Cart Button -->
+            <!-- User Buttons -->
+            <div *ngIf="!isAdmin()" class="user-buttons">
+              <button class="btn-view-product" (click)="viewProduct(product)">
+                👁️ Ver Producto
+              </button>
+            </div>
+            
+            <!-- Add to Cart Button (for all users) -->
             <button 
               class="btn-add-cart" 
               [disabled]="product.stock === 0"
@@ -156,6 +163,71 @@
         <button class="btn-save" (click)="saveProduct()">
           {{ isEditingProduct ? 'Actualizar' : 'Crear' }}
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div *ngIf="showProductDetail && selectedProduct" class="modal-overlay" (click)="closeProductDetail()">
+    <div class="modal-content product-detail-modal" (click)="$event.stopPropagation()">
+      <button class="btn-close-modal" (click)="closeProductDetail()">✕</button>
+      
+      <div class="product-detail-content">
+        <div class="product-detail-image">
+          <img [src]="selectedProduct.image_url" [alt]="selectedProduct.name">
+          <span *ngIf="selectedProduct.stock === 0" class="badge-out-of-stock">Agotado</span>
+          <span *ngIf="selectedProduct.stock > 0 && selectedProduct.stock < 10" class="badge-low-stock">
+            ¡Solo quedan {{ selectedProduct.stock }}!
+          </span>
+        </div>
+        
+        <div class="product-detail-info">
+          <h2>{{ selectedProduct.name }}</h2>
+          
+          <div class="product-category-badge">
+            📦 {{ selectedProduct.category_name }}
+          </div>
+          
+          <div class="product-price-section">
+            <span class="price-label">Precio:</span>
+            <span class="price-value">{{ selectedProduct.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          
+          <div class="product-description-full">
+            <h3>Descripción</h3>
+            <p>{{ selectedProduct.description }}</p>
+          </div>
+          
+          <div class="product-specifications">
+            <h3>Especificaciones</h3>
+            <div class="spec-item">
+              <span class="spec-label">📦 Stock disponible:</span>
+              <span class="spec-value">{{ selectedProduct.stock }} unidades</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">🏷️ Categoría:</span>
+              <span class="spec-value">{{ selectedProduct.category_name }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">🆔 ID del producto:</span>
+              <span class="spec-value">#{{ selectedProduct.id }}</span>
+            </div>
+            <div class="spec-item" *ngIf="selectedProduct.created_at">
+              <span class="spec-label">📅 Fecha de publicación:</span>
+              <span class="spec-value">{{ selectedProduct.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+          
+          <div class="product-actions">
+            <button 
+              class="btn-add-to-cart-detail" 
+              [disabled]="selectedProduct.stock === 0"
+              [class.disabled]="selectedProduct.stock === 0"
+              (click)="addToCartFromDetail()">
+              {{ selectedProduct.stock === 0 ? '❌ Producto Agotado' : '🛒 Añadir al Carrito' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

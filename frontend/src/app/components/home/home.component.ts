@@ -32,6 +32,10 @@ export class HomeComponent implements OnInit {
   cart: { product: Product; quantity: number }[] = [];
   cartTotal = 0;
   showCart = false;
+  
+  // Product detail view
+  showProductDetail = false;
+  selectedProduct: Product | null = null;
 
   constructor(
     private authService: AuthService,
@@ -159,6 +163,24 @@ export class HomeComponent implements OnInit {
           this.error = 'Error al eliminar el producto';
         }
       });
+    }
+  }
+
+  // Product detail functions
+  viewProduct(product: Product): void {
+    this.selectedProduct = product;
+    this.showProductDetail = true;
+  }
+
+  closeProductDetail(): void {
+    this.showProductDetail = false;
+    this.selectedProduct = null;
+  }
+
+  addToCartFromDetail(): void {
+    if (this.selectedProduct) {
+      this.addToCart(this.selectedProduct);
+      this.closeProductDetail();
     }
   }
 
