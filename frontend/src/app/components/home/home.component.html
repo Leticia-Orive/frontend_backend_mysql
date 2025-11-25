@@ -1,0 +1,31 @@
+<div class="home-container">
+  <div class="home-card">
+    <h1>🏠 Bienvenido a la Tienda Online</h1>
+    
+    <div class="user-info" *ngIf="currentUser">
+      <h2>Hola, {{ currentUser.name }}!</h2>
+      <p class="email">{{ currentUser.email }}</p>
+      <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
+        {{ currentUser.role === 'admin' ? 'Administrador' : 'Usuario' }}
+      </span>
+    </div>
+
+    <div class="actions">
+      <button 
+        *ngIf="currentUser?.role === 'admin'" 
+        class="btn-primary" 
+        (click)="goToUsers()">
+        👥 Ver Usuarios
+      </button>
+      
+      <div *ngIf="currentUser?.role !== 'admin'" class="info-box">
+        <p>Como usuario estándar, no tienes acceso a la gestión de usuarios.</p>
+        <p>Solo los administradores pueden ver y gestionar usuarios.</p>
+      </div>
+
+      <button class="btn-logout" (click)="logout()">
+        🚪 Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</div>

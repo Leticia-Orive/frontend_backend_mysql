@@ -7,11 +7,19 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .header h2 {
   color: #333;
   font-size: 1.8rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -64,6 +72,17 @@
 
 .btn-delete:hover {
   background: #c82333;
+}
+
+.btn-logout {
+  background: #ff6b6b;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background: #ee5a52;
+  transform: translateY(-2px);
 }
 
 /* Alert */
@@ -217,4 +236,19 @@ td {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 30px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.role-badge.admin {
+  background: #fff3e0;
+  color: #f57c00;
 }

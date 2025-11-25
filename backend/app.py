@@ -48,6 +48,35 @@ def token_required(f):
     
     return decorated
 
+# Decorator para rutas que requieren rol de administrador
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'error': 'Token no proporcionado'}), 401
+        
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user_id = data['user_id']
+            user_role = data.get('role', 'user')
+            
+            # Verificar que el usuario sea administrador
+            if user_role != 'admin':
+                return jsonify({'error': 'Acceso denegado. Se requiere rol de administrador'}), 403
+                
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Token inválido'}), 401
+        
+        return f(current_user_id, *args, **kwargs)
+    
+    return decorated
+
 # Ruta de bienvenida
 @app.route('/')
 def home():
@@ -180,14 +209,14 @@ def get_profile(current_user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Obtener todos los usuarios (protegido)
+# Obtener todos los usuarios (solo administradores)
 @app.route('/api/users', methods=['GET'])
-@token_required
+@admin_required
 def get_users(current_user_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, name, email, created_at FROM users")
+        cur.execute("SELECT id, name, email, role, created_at FROM users")
         users = cur.fetchall()
         cur.close()
         conn.close()

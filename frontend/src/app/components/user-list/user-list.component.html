@@ -1,9 +1,17 @@
 <div class="container">
   <div class="header">
     <h2>Gestión de Usuarios</h2>
-    <button class="btn btn-primary" (click)="openCreateForm()">
-      + Nuevo Usuario
-    </button>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="goToHome()">
+        🏠 Inicio
+      </button>
+      <button class="btn btn-primary" (click)="openCreateForm()">
+        + Nuevo Usuario
+      </button>
+      <button class="btn btn-logout" (click)="logout()">
+        🚪 Cerrar Sesión
+      </button>
+    </div>
   </div>
 
   <div *ngIf="error" class="alert alert-error">
@@ -26,6 +34,7 @@
           <th>ID</th>
           <th>Nombre</th>
           <th>Email</th>
+          <th>Rol</th>
           <th>Fecha de creación</th>
           <th>Acciones</th>
         </tr>
@@ -35,6 +44,11 @@
           <td>{{ user.id }}</td>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
+          <td>
+            <span class="role-badge" [class.admin]="user.role === 'admin'">
+              {{ user.role === 'admin' ? 'Administrador' : 'Usuario' }}
+            </span>
+          </td>
           <td>{{ user.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
           <td class="actions">
             <button class="btn btn-small btn-edit" (click)="openEditForm(user)">
