@@ -1,15 +1,1 @@
-<header *ngIf="authService.isLoggedIn()">
-  <div class="container header-content">
-    <h1>🛒 {{ title }}</h1>
-    <div class="user-menu" *ngIf="authService.currentUser$ | async as user">
-      <span class="user-role" [class.admin]="user.role === 'admin'">
-        {{ user.role === 'admin' ? '👑 Admin' : '👤 Usuario' }}
-      </span>
-      <span class="user-name">{{ user.name }}</span>
-      <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
-    </div>
-  </div>
-</header>
-<main>
-  <router-outlet></router-outlet>
-</main>
+<router-outlet></router-outlet>
