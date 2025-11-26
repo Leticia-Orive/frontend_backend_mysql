@@ -36,6 +36,24 @@
     </div>
   </header>
 
+  <!-- Coupons Notification -->
+  <div *ngIf="currentUser && userCoupons.length > 0 && showCouponsNotification" class="coupons-notification">
+    <div class="notification-content">
+      <button class="btn-close-notification" (click)="showCouponsNotification = false">✖</button>
+      <div class="notification-icon">🎁</div>
+      <div class="notification-text">
+        <h3>¡Tienes {{ userCoupons.length }} cupón{{ userCoupons.length > 1 ? 'es' : '' }} disponible{{ userCoupons.length > 1 ? 's' : '' }}!</h3>
+        <div class="coupon-list">
+          <div *ngFor="let coupon of userCoupons" class="coupon-item">
+            <span class="coupon-code">{{ coupon.coupon_code }}</span>
+            <span class="coupon-amount">€{{ coupon.discount_amount }}</span>
+          </div>
+        </div>
+        <p class="notification-hint">Úsalos en el carrito para obtener descuentos</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Category Filter -->
   <div class="category-filter">
     <button 

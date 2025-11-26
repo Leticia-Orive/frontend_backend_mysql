@@ -511,5 +511,140 @@ def delete_product(current_user_id, product_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ========== ENDPOINTS DE CUPONES ==========
+
+# Obtener cupones del usuario actual
+@app.route('/api/my-coupons', methods=['GET'])
+@token_required
+def get_my_coupons(current_user_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Obtener cupones no usados
+        cur.execute("""
+            SELECT id, coupon_code, discount_amount, created_at
+            FROM user_coupons
+            WHERE user_id = %s AND is_used = FALSE
+            ORDER BY created_at DESC
+        """, (current_user_id,))
+        
+        coupons = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return jsonify(coupons), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Usar un cupón
+@app.route('/api/use-coupon', methods=['POST'])
+@token_required
+def use_coupon(current_user_id):
+    try:
+        data = request.get_json()
+        coupon_code = data.get('coupon_code')
+        
+        if not coupon_code:
+            return jsonify({'error': 'Código de cupón requerido'}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verificar que el cupón existe, pertenece al usuario y no ha sido usado
+        cur.execute("""
+            SELECT id, discount_amount
+            FROM user_coupons
+            WHERE user_id = %s AND coupon_code = %s AND is_used = FALSE
+        """, (current_user_id, coupon_code))
+        
+        coupon = cur.fetchone()
+        
+        if not coupon:
+            cur.close()
+            conn.close()
+            return jsonify({'error': 'Cupón inválido o ya usado'}), 400
+        
+        # Marcar cupón como usado
+        cur.execute("""
+            UPDATE user_coupons
+            SET is_used = TRUE, used_at = NOW()
+            WHERE id = %s
+        """, (coupon['id'],))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Cupón aplicado exitosamente',
+            'discount_amount': float(coupon['discount_amount'])
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Generar cupón para el usuario (por cada compra)
+def generate_coupon_code(user_id, purchase_count):
+    """Genera un código de cupón único"""
+    import random
+    import string
+    timestamp = datetime.now().strftime('%Y%m%d')
+    random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    return f"USER{user_id}-{timestamp}-{random_str}"
+
+# Procesar compra y generar cupón
+@app.route('/api/checkout', methods=['POST'])
+@token_required
+def checkout(current_user_id):
+    try:
+        data = request.get_json()
+        total_amount = data.get('total_amount')
+        discount_applied = data.get('discount_applied', 0)
+        coupon_used = data.get('coupon_used', None)
+        
+        if not total_amount:
+            return jsonify({'error': 'Monto total requerido'}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Registrar la compra
+        cur.execute("""
+            INSERT INTO purchase_history (user_id, total_amount, discount_applied, coupon_used)
+            VALUES (%s, %s, %s, %s)
+        """, (current_user_id, total_amount, discount_applied, coupon_used))
+        
+        purchase_id = cur.lastrowid
+        
+        # Contar cuántas compras ha hecho el usuario
+        cur.execute("SELECT COUNT(*) as count FROM purchase_history WHERE user_id = %s", (current_user_id,))
+        purchase_count = cur.fetchone()['count']
+        
+        # Generar cupón de descuento (por ejemplo, 5€ por cada compra)
+        coupon_amount = 5.0
+        coupon_code = generate_coupon_code(current_user_id, purchase_count)
+        
+        cur.execute("""
+            INSERT INTO user_coupons (user_id, coupon_code, discount_amount)
+            VALUES (%s, %s, %s)
+        """, (current_user_id, coupon_code, coupon_amount))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Compra procesada exitosamente',
+            'purchase_id': purchase_id,
+            'new_coupon': {
+                'code': coupon_code,
+                'amount': coupon_amount
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
+import { CouponService } from '../../services/coupon.service';
 import { Category } from '../../models/category.model';
 import { Product } from '../../models/product.model';
 
@@ -40,6 +41,8 @@ export class HomeComponent implements OnInit {
   couponCode = '';
   appliedCoupon: string | null = null;
   couponDiscount = 0;
+  userCoupons: any[] = [];
+  showCouponsNotification = false;
   
   // Product detail view
   showProductDetail = false;
@@ -49,12 +52,16 @@ export class HomeComponent implements OnInit {
     private authService: AuthService,
     private categoryService: CategoryService,
     private productService: ProductService,
+    private couponService: CouponService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      if (user) {
+        this.loadUserCoupons();
+      }
     });
     this.loadCategories();
     // No cargar el carrito automáticamente
@@ -261,22 +268,63 @@ export class HomeComponent implements OnInit {
     this.calculateTotal();
   }
 
+  loadUserCoupons(): void {
+    this.couponService.getMyCoupons().subscribe({
+      next: (coupons) => {
+        this.userCoupons = coupons;
+        if (coupons.length > 0) {
+          this.showCouponsNotification = true;
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar cupones:', err);
+      }
+    });
+  }
+
   applyCoupon(): void {
-    const validCoupons: { [key: string]: number } = {
-      'BIENVENIDO10': 10,
-      'DESCUENTO20': 20,
-      'VERANO15': 15
-    };
+    if (!this.couponCode.trim()) {
+      alert('Por favor ingresa un código de cupón');
+      return;
+    }
+
+    // Buscar el cupón en los cupones del usuario
+    const userCoupon = this.userCoupons.find(c => c.coupon_code === this.couponCode.trim());
     
-    const couponUpper = this.couponCode.toUpperCase();
-    
-    if (validCoupons[couponUpper]) {
-      this.appliedCoupon = couponUpper;
-      this.couponDiscount = validCoupons[couponUpper];
-      this.calculateTotal();
-      alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+    if (userCoupon) {
+      if (this.currentUser) {
+        // Usuario registrado usando su cupón personal
+        this.couponService.useCoupon(this.couponCode).subscribe({
+          next: (response) => {
+            this.appliedCoupon = this.couponCode;
+            this.couponDiscount = response.discount_amount;
+            this.calculateTotal();
+            this.loadUserCoupons(); // Recargar cupones
+            alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+          },
+          error: (err) => {
+            alert('Error al aplicar el cupón: ' + (err.error?.error || 'Cupón inválido'));
+          }
+        });
+      }
     } else {
-      alert('Cupón inválido');
+      // Cupones genéricos disponibles para todos
+      const validCoupons: { [key: string]: number } = {
+        'BIENVENIDO10': 10,
+        'DESCUENTO20': 20,
+        'VERANO15': 15
+      };
+      
+      const couponUpper = this.couponCode.toUpperCase();
+      
+      if (validCoupons[couponUpper]) {
+        this.appliedCoupon = couponUpper;
+        this.couponDiscount = validCoupons[couponUpper];
+        this.calculateTotal();
+        alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+      } else {
+        alert('Cupón inválido');
+      }
     }
   }
   
@@ -289,11 +337,23 @@ export class HomeComponent implements OnInit {
 
   proceedToCheckout(): void {
     if (!this.currentUser) {
-      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nTotal: €${this.cartTotal.toFixed(2)}\n\n¡Regístrate para obtener un 10% de descuento en todas tus compras y acceso a cupones exclusivos!`;
+      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nTotal: €${this.cartTotal.toFixed(2)}\n\n¡Regístrate para obtener un 10% de descuento en todas tus compras y cupones en cada compra!`;
       alert(message);
+      this.clearCart();
     } else {
-      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total: €${this.cartTotal.toFixed(2)}\n\n¡Gracias por ser parte de nuestra comunidad!`;
-      alert(message);
+      // Procesar compra y generar cupón
+      this.couponService.checkout(this.cartTotal, this.cartDiscount + this.couponDiscount, this.appliedCoupon).subscribe({
+        next: (response) => {
+          const message = `¡Compra realizada exitosamente!\n\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total pagado: €${this.cartTotal.toFixed(2)}\n\n🎁 ¡NUEVO CUPÓN GENERADO!\nCódigo: ${response.new_coupon.code}\nDescuento: €${response.new_coupon.amount}\n\n¡Úsalo en tu próxima compra!`;
+          alert(message);
+          this.clearCart();
+          this.removeCoupon();
+          this.loadUserCoupons(); // Recargar cupones
+        },
+        error: (err) => {
+          alert('Error al procesar la compra: ' + (err.error?.error || 'Error desconocido'));
+        }
+      });
     }
   }
 
