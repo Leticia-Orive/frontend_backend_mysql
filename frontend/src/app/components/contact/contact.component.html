@@ -1,0 +1,155 @@
+<div class="contact-container">
+  <!-- Header -->
+  <header class="contact-header">
+    <button class="btn-back" (click)="goBack()">
+      ← Volver al inicio
+    </button>
+    <h1>📧 Contáctanos</h1>
+    <p class="subtitle">Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo.</p>
+  </header>
+
+  <!-- Success Message -->
+  <div *ngIf="showSuccessMessage" class="success-message">
+    <div class="success-content">
+      <span class="success-icon">✓</span>
+      <div>
+        <h3>¡Mensaje enviado exitosamente!</h3>
+        <p>Nos pondremos en contacto contigo lo antes posible.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-content">
+    <!-- Contact Form -->
+    <div class="form-section">
+      <div class="form-card">
+        <h2>Envíanos tu consulta</h2>
+        <form (ngSubmit)="submitForm()">
+          <div class="form-group">
+            <label for="name">Nombre completo *</label>
+            <input
+              type="text"
+              id="name"
+              [(ngModel)]="contactForm.name"
+              name="name"
+              placeholder="Tu nombre"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="contactForm.email"
+              name="email"
+              placeholder="tu@email.com"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Teléfono (opcional)</label>
+            <input
+              type="tel"
+              id="phone"
+              [(ngModel)]="contactForm.phone"
+              name="phone"
+              placeholder="+34 600 000 000">
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Asunto *</label>
+            <select
+              id="subject"
+              [(ngModel)]="contactForm.subject"
+              name="subject"
+              required>
+              <option value="" disabled>Selecciona un asunto</option>
+              <option *ngFor="let subject of subjects" [value]="subject">
+                {{ subject }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensaje *</label>
+            <textarea
+              id="message"
+              [(ngModel)]="contactForm.message"
+              name="message"
+              placeholder="Describe tu consulta o problema..."
+              rows="6"
+              required></textarea>
+            <span class="char-count">{{ contactForm.message.length }}/500</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-reset" (click)="resetForm()">
+              Limpiar
+            </button>
+            <button type="submit" class="btn-submit">
+              Enviar mensaje
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="info-section">
+      <div class="info-card">
+        <h2>Información de Contacto</h2>
+        
+        <div class="info-item">
+          <div class="info-icon">📍</div>
+          <div class="info-details">
+            <h3>Dirección</h3>
+            <p>Calle Gran Vía 28<br>28013 Madrid, España</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">📞</div>
+          <div class="info-details">
+            <h3>Teléfono</h3>
+            <p>+34 900 123 456</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">✉️</div>
+          <div class="info-details">
+            <h3>Email</h3>
+            <p>soporte&#64;tiendaonline.com</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">🕐</div>
+          <div class="info-details">
+            <h3>Horario de atención</h3>
+            <p>Lunes a Viernes: 9:00 - 18:00<br>Sábados: 10:00 - 14:00</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card">
+        <h3>Preguntas Frecuentes</h3>
+        <ul>
+          <li>
+            <strong>¿Cuánto tarda la respuesta?</strong>
+            <p>Respondemos en menos de 24 horas hábiles.</p>
+          </li>
+          <li>
+            <strong>¿Tienen chat en vivo?</strong>
+            <p>Próximamente disponible. Por ahora usa el formulario.</p>
+          </li>
+          <li>
+            <strong>¿Puedo cambiar mi pedido?</strong>
+            <p>Sí, contáctanos inmediatamente después de realizar el pedido.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

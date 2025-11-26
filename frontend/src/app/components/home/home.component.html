@@ -4,6 +4,10 @@
     <div class="header-content">
       <h1>🛒 Tienda Online</h1>
       <div class="header-actions">
+        <button class="btn-contact" routerLink="/contact">
+          📧 Contacto
+        </button>
+        
         <!-- Not logged in -->
         <div *ngIf="!currentUser" class="auth-buttons">
           <button class="btn-login" routerLink="/login">
