@@ -361,4 +361,121 @@
       </div>
     </div>
   </div>
+
+  <!-- Payment Modal -->
+  <div *ngIf="showPaymentModal" class="modal-overlay" (click)="closePaymentModal()">
+    <div class="payment-modal" (click)="$event.stopPropagation()">
+      <div class="payment-header">
+        <h2>💳 Método de Pago</h2>
+        <button class="btn-close-modal" (click)="closePaymentModal()">✖</button>
+      </div>
+
+      <div class="payment-content">
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h3>Resumen del Pedido</h3>
+          <div class="summary-line">
+            <span>Subtotal:</span>
+            <span>{{ cartSubtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div *ngIf="currentUser" class="summary-line discount">
+            <span>Descuento usuario:</span>
+            <span>-{{ cartDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div *ngIf="appliedCoupon" class="summary-line discount">
+            <span>Cupón:</span>
+            <span>-{{ couponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="summary-line total">
+            <span><strong>Total a pagar:</strong></span>
+            <span><strong>{{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+          <h3>Selecciona tu método de pago</h3>
+          
+          <div class="payment-options">
+            <div 
+              class="payment-option" 
+              [class.selected]="paymentMethod === 'tarjeta'"
+              (click)="selectPaymentMethod('tarjeta')">
+              <div class="payment-icon">💳</div>
+              <div class="payment-info">
+                <h4>Tarjeta de Crédito/Débito</h4>
+                <p>Visa, Mastercard, American Express</p>
+              </div>
+              <div class="payment-check" *ngIf="paymentMethod === 'tarjeta'">✓</div>
+            </div>
+
+            <div 
+              class="payment-option" 
+              [class.selected]="paymentMethod === 'paypal'"
+              (click)="selectPaymentMethod('paypal')">
+              <div class="payment-icon">🅿️</div>
+              <div class="payment-info">
+                <h4>PayPal</h4>
+                <p>Pago seguro con tu cuenta PayPal</p>
+              </div>
+              <div class="payment-check" *ngIf="paymentMethod === 'paypal'">✓</div>
+            </div>
+
+            <div 
+              class="payment-option" 
+              [class.selected]="paymentMethod === 'bizum'"
+              (click)="selectPaymentMethod('bizum')">
+              <div class="payment-icon">📱</div>
+              <div class="payment-info">
+                <h4>Bizum</h4>
+                <p>Pago instantáneo desde tu móvil</p>
+              </div>
+              <div class="payment-check" *ngIf="paymentMethod === 'bizum'">✓</div>
+            </div>
+
+            <div 
+              class="payment-option" 
+              [class.selected]="paymentMethod === 'efectivo'"
+              (click)="selectPaymentMethod('efectivo')">
+              <div class="payment-icon">💵</div>
+              <div class="payment-info">
+                <h4>Efectivo en Tienda</h4>
+                <p>Paga al recoger tu pedido</p>
+              </div>
+              <div class="payment-check" *ngIf="paymentMethod === 'efectivo'">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pickup Points (only for cash payment) -->
+        <div *ngIf="showPickupOptions" class="pickup-section">
+          <h3>📍 Selecciona tu punto de recogida</h3>
+          <p class="pickup-note">El pago en efectivo solo está disponible con recogida en tienda</p>
+          
+          <div class="pickup-options">
+            <div 
+              *ngFor="let point of pickupPoints"
+              class="pickup-option"
+              [class.selected]="pickupPoint === point"
+              (click)="pickupPoint = point">
+              <div class="pickup-icon">🏪</div>
+              <div class="pickup-info">{{ point }}</div>
+              <div class="pickup-check" *ngIf="pickupPoint === point">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="payment-actions">
+          <button class="btn-cancel" (click)="closePaymentModal()">Cancelar</button>
+          <button 
+            class="btn-confirm-payment" 
+            (click)="confirmPayment()"
+            [disabled]="!paymentMethod || (paymentMethod === 'efectivo' && !pickupPoint)">
+            Confirmar Pago
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

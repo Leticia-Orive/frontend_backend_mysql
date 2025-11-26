@@ -44,6 +44,18 @@ export class HomeComponent implements OnInit {
   userCoupons: any[] = [];
   showCouponsNotification = false;
   
+  // Payment and pickup
+  showPaymentModal = false;
+  paymentMethod: 'tarjeta' | 'paypal' | 'bizum' | 'efectivo' | null = null;
+  pickupPoint = '';
+  showPickupOptions = false;
+  pickupPoints = [
+    'Tienda Madrid - Calle Gran Vía 28',
+    'Tienda Barcelona - Plaza Catalunya 10',
+    'Tienda Valencia - Calle Colón 45',
+    'Tienda Sevilla - Avenida Constitución 15'
+  ];
+  
   // Product detail view
   showProductDetail = false;
   selectedProduct: Product | null = null;
@@ -336,25 +348,91 @@ export class HomeComponent implements OnInit {
   }
 
   proceedToCheckout(): void {
-    if (!this.currentUser) {
-      const message = `Subtotal: €${this.cartSubtotal.toFixed(2)}\nTotal: €${this.cartTotal.toFixed(2)}\n\n¡Regístrate para obtener un 10% de descuento en todas tus compras y cupones en cada compra!`;
-      alert(message);
-      this.clearCart();
-    } else {
-      // Procesar compra y generar cupón
-      this.couponService.checkout(this.cartTotal, this.cartDiscount + this.couponDiscount, this.appliedCoupon).subscribe({
-        next: (response) => {
-          const message = `¡Compra realizada exitosamente!\n\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total pagado: €${this.cartTotal.toFixed(2)}\n\n🎁 ¡NUEVO CUPÓN GENERADO!\nCódigo: ${response.new_coupon.code}\nDescuento: €${response.new_coupon.amount}\n\n¡Úsalo en tu próxima compra!`;
-          alert(message);
-          this.clearCart();
-          this.removeCoupon();
-          this.loadUserCoupons(); // Recargar cupones
-        },
-        error: (err) => {
-          alert('Error al procesar la compra: ' + (err.error?.error || 'Error desconocido'));
-        }
-      });
+    if (this.cart.length === 0) {
+      alert('El carrito está vacío');
+      return;
     }
+    
+    // Cerrar el carrito y abrir modal de pago
+    this.showCart = false;
+    this.showPaymentModal = true;
+    this.paymentMethod = null;
+    this.pickupPoint = '';
+    this.showPickupOptions = false;
+  }
+  
+  selectPaymentMethod(method: 'tarjeta' | 'paypal' | 'bizum' | 'efectivo'): void {
+    this.paymentMethod = method;
+    
+    // Solo efectivo requiere punto de recogida obligatorio
+    if (method === 'efectivo') {
+      this.showPickupOptions = true;
+    } else {
+      this.showPickupOptions = false;
+      this.pickupPoint = '';
+    }
+  }
+  
+  confirmPayment(): void {
+    if (!this.paymentMethod) {
+      alert('Por favor selecciona un método de pago');
+      return;
+    }
+    
+    if (this.paymentMethod === 'efectivo' && !this.pickupPoint) {
+      alert('Por favor selecciona un punto de recogida para pago en efectivo');
+      return;
+    }
+    
+    // Procesar según si está registrado o no
+    if (!this.currentUser) {
+      this.processGuestCheckout();
+    } else {
+      this.processUserCheckout();
+    }
+  }
+  
+  processGuestCheckout(): void {
+    const pickupInfo = this.paymentMethod === 'efectivo' ? `\nPunto de recogida: ${this.pickupPoint}` : '';
+    const message = `¡Pedido confirmado!\n\nMétodo de pago: ${this.getPaymentMethodName()}\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nTotal: €${this.cartTotal.toFixed(2)}${pickupInfo}\n\n¡Regístrate para obtener un 10% de descuento y cupones en cada compra!`;
+    alert(message);
+    this.clearCart();
+    this.closePaymentModal();
+  }
+  
+  processUserCheckout(): void {
+    // Procesar compra y generar cupón
+    this.couponService.checkout(this.cartTotal, this.cartDiscount + this.couponDiscount, this.appliedCoupon).subscribe({
+      next: (response) => {
+        const pickupInfo = this.paymentMethod === 'efectivo' ? `\nPunto de recogida: ${this.pickupPoint}` : '';
+        const message = `¡Compra realizada exitosamente!\n\nMétodo de pago: ${this.getPaymentMethodName()}\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total pagado: €${this.cartTotal.toFixed(2)}${pickupInfo}\n\n🎁 ¡NUEVO CUPÓN GENERADO!\nCódigo: ${response.new_coupon.code}\nDescuento: €${response.new_coupon.amount}\n\n¡Úsalo en tu próxima compra!`;
+        alert(message);
+        this.clearCart();
+        this.removeCoupon();
+        this.loadUserCoupons();
+        this.closePaymentModal();
+      },
+      error: (err) => {
+        alert('Error al procesar la compra: ' + (err.error?.error || 'Error desconocido'));
+      }
+    });
+  }
+  
+  getPaymentMethodName(): string {
+    const methods = {
+      'tarjeta': 'Tarjeta de Crédito/Débito',
+      'paypal': 'PayPal',
+      'bizum': 'Bizum',
+      'efectivo': 'Efectivo en Tienda'
+    };
+    return this.paymentMethod ? methods[this.paymentMethod] : '';
+  }
+  
+  closePaymentModal(): void {
+    this.showPaymentModal = false;
+    this.paymentMethod = null;
+    this.pickupPoint = '';
+    this.showPickupOptions = false;
   }
 
   logout(): void {
