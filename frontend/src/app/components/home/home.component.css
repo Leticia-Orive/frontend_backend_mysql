@@ -1484,3 +1484,292 @@
     width: 100%;
   }
 }
+
+/* Card Payment Modal */
+.card-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.card-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.card-modal-content {
+  padding: 25px;
+}
+
+.card-preview {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 25px;
+  border-radius: 15px;
+  color: white;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  min-height: 180px;
+  position: relative;
+}
+
+.card-chip {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.card-number-display {
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+  font-family: 'Courier New', monospace;
+}
+
+.card-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.card-holder-display {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-expiry-display {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-row-card {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+}
+
+.card-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-confirm-card {
+  flex: 1;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirm-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+/* Bizum Payment Modal */
+.bizum-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.bizum-modal-header {
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bizum-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.bizum-modal-content {
+  padding: 25px;
+}
+
+.bizum-info {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.bizum-logo {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.bizum-info h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.bizum-info p {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.amount-display {
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+}
+
+.bizum-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: #00b4d8;
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+}
+
+.phone-prefix {
+  background: #f0f0f0;
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #333;
+  border-right: 2px solid #e0e0e0;
+}
+
+.phone-input-wrapper input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input-hint {
+  margin: 5px 0 0 0;
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+.bizum-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-confirm-bizum {
+  flex: 1;
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+}
+
+.btn-confirm-bizum:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 119, 182, 0.4);
+}
+
+@media (max-width: 768px) {
+  .card-modal,
+  .bizum-modal {
+    width: 95%;
+  }
+
+  .card-modal-content,
+  .bizum-modal-content {
+    padding: 20px;
+  }
+
+  .form-row-card {
+    grid-template-columns: 1fr;
+  }
+
+  .card-number-display {
+    font-size: 1.1rem;
+  }
+
+  .amount-display {
+    font-size: 1.5rem;
+  }
+}

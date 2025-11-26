@@ -56,6 +56,17 @@ export class HomeComponent implements OnInit {
     'Tienda Sevilla - Avenida Constitución 15'
   ];
   
+  // Card payment details
+  showCardModal = false;
+  cardNumber = '';
+  cardHolder = '';
+  cardExpiry = '';
+  cardCVV = '';
+  
+  // Bizum payment details
+  showBizumModal = false;
+  bizumPhone = '';
+  
   // Product detail view
   showProductDetail = false;
   selectedProduct: Product | null = null;
@@ -384,12 +395,113 @@ export class HomeComponent implements OnInit {
       return;
     }
     
+    // Abrir modales específicos según el método de pago
+    if (this.paymentMethod === 'tarjeta') {
+      this.openCardModal();
+      return;
+    }
+    
+    if (this.paymentMethod === 'bizum') {
+      this.openBizumModal();
+      return;
+    }
+    
+    // Para PayPal y Efectivo procesar directamente
+    this.finalizePayment();
+  }
+  
+  openCardModal(): void {
+    this.showCardModal = true;
+    this.cardNumber = '';
+    this.cardHolder = '';
+    this.cardExpiry = '';
+    this.cardCVV = '';
+  }
+  
+  closeCardModal(): void {
+    this.showCardModal = false;
+  }
+  
+  confirmCardPayment(): void {
+    if (!this.cardNumber || !this.cardHolder || !this.cardExpiry || !this.cardCVV) {
+      alert('Por favor completa todos los campos de la tarjeta');
+      return;
+    }
+    
+    if (this.cardNumber.length !== 16) {
+      alert('El número de tarjeta debe tener 16 dígitos');
+      return;
+    }
+    
+    if (this.cardCVV.length !== 3) {
+      alert('El CVV debe tener 3 dígitos');
+      return;
+    }
+    
+    this.closeCardModal();
+    this.finalizePayment();
+  }
+  
+  openBizumModal(): void {
+    this.showBizumModal = true;
+    this.bizumPhone = '';
+  }
+  
+  closeBizumModal(): void {
+    this.showBizumModal = false;
+  }
+  
+  confirmBizumPayment(): void {
+    if (!this.bizumPhone) {
+      alert('Por favor ingresa tu número de teléfono');
+      return;
+    }
+    
+    if (this.bizumPhone.length !== 9) {
+      alert('El número de teléfono debe tener 9 dígitos');
+      return;
+    }
+    
+    this.closeBizumModal();
+    this.finalizePayment();
+  }
+  
+  finalizePayment(): void {
     // Procesar según si está registrado o no
     if (!this.currentUser) {
       this.processGuestCheckout();
     } else {
       this.processUserCheckout();
     }
+  }
+  
+  formatCardNumber(event: any): void {
+    let value = event.target.value.replace(/\s/g, '');
+    value = value.replace(/\D/g, '');
+    if (value.length > 16) value = value.substr(0, 16);
+    this.cardNumber = value;
+  }
+  
+  formatExpiry(event: any): void {
+    let value = event.target.value.replace(/\s/g, '');
+    value = value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      value = value.substr(0, 2) + '/' + value.substr(2, 2);
+    }
+    if (value.length > 5) value = value.substr(0, 5);
+    this.cardExpiry = value;
+  }
+  
+  formatCVV(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 3) value = value.substr(0, 3);
+    this.cardCVV = value;
+  }
+  
+  formatPhone(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 9) value = value.substr(0, 9);
+    this.bizumPhone = value;
   }
   
   processGuestCheckout(): void {

@@ -478,4 +478,124 @@
       </div>
     </div>
   </div>
+
+  <!-- Card Payment Modal -->
+  <div *ngIf="showCardModal" class="modal-overlay" (click)="closeCardModal()">
+    <div class="card-modal" (click)="$event.stopPropagation()">
+      <div class="card-modal-header">
+        <h2>💳 Datos de la Tarjeta</h2>
+        <button class="btn-close-modal" (click)="closeCardModal()">✖</button>
+      </div>
+
+      <div class="card-modal-content">
+        <div class="card-preview">
+          <div class="card-chip">💳</div>
+          <div class="card-number-display">{{ cardNumber || '**** **** **** ****' }}</div>
+          <div class="card-details">
+            <div class="card-holder-display">{{ cardHolder || 'TITULAR DE LA TARJETA' }}</div>
+            <div class="card-expiry-display">{{ cardExpiry || 'MM/AA' }}</div>
+          </div>
+        </div>
+
+        <form class="card-form">
+          <div class="form-group">
+            <label>Número de Tarjeta</label>
+            <input 
+              type="text" 
+              [(ngModel)]="cardNumber"
+              (input)="formatCardNumber($event)"
+              placeholder="1234 5678 9012 3456"
+              maxlength="16"
+              name="cardNumber">
+          </div>
+
+          <div class="form-group">
+            <label>Titular de la Tarjeta</label>
+            <input 
+              type="text" 
+              [(ngModel)]="cardHolder"
+              placeholder="NOMBRE COMPLETO"
+              name="cardHolder"
+              style="text-transform: uppercase;">
+          </div>
+
+          <div class="form-row-card">
+            <div class="form-group">
+              <label>Fecha de Expiración</label>
+              <input 
+                type="text" 
+                [(ngModel)]="cardExpiry"
+                (input)="formatExpiry($event)"
+                placeholder="MM/AA"
+                maxlength="5"
+                name="cardExpiry">
+            </div>
+
+            <div class="form-group">
+              <label>CVV</label>
+              <input 
+                type="text" 
+                [(ngModel)]="cardCVV"
+                (input)="formatCVV($event)"
+                placeholder="123"
+                maxlength="3"
+                name="cardCVV">
+            </div>
+          </div>
+
+          <div class="card-modal-actions">
+            <button type="button" class="btn-cancel" (click)="closeCardModal()">Cancelar</button>
+            <button type="button" class="btn-confirm-card" (click)="confirmCardPayment()">
+              Pagar {{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bizum Payment Modal -->
+  <div *ngIf="showBizumModal" class="modal-overlay" (click)="closeBizumModal()">
+    <div class="bizum-modal" (click)="$event.stopPropagation()">
+      <div class="bizum-modal-header">
+        <h2>📱 Pago con Bizum</h2>
+        <button class="btn-close-modal" (click)="closeBizumModal()">✖</button>
+      </div>
+
+      <div class="bizum-modal-content">
+        <div class="bizum-info">
+          <div class="bizum-logo">📱</div>
+          <h3>Pago Instantáneo</h3>
+          <p>Introduce tu número de teléfono asociado a Bizum</p>
+          <div class="amount-display">
+            {{ cartTotal | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+
+        <form class="bizum-form">
+          <div class="form-group">
+            <label>Número de Teléfono</label>
+            <div class="phone-input-wrapper">
+              <span class="phone-prefix">+34</span>
+              <input 
+                type="tel" 
+                [(ngModel)]="bizumPhone"
+                (input)="formatPhone($event)"
+                placeholder="612 345 678"
+                maxlength="9"
+                name="bizumPhone">
+            </div>
+            <p class="input-hint">Recibirás una notificación en tu móvil para confirmar el pago</p>
+          </div>
+
+          <div class="bizum-modal-actions">
+            <button type="button" class="btn-cancel" (click)="closeBizumModal()">Cancelar</button>
+            <button type="button" class="btn-confirm-bizum" (click)="confirmBizumPayment()">
+              Enviar solicitud de pago
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
