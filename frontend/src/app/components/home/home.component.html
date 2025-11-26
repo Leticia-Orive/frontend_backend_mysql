@@ -303,32 +303,58 @@
         <!-- Coupon Section -->
         <div class="cart-coupon-section">
           <h4>¿Tienes un cupón?</h4>
-          <div class="coupon-input-group">
-            <input 
-              type="text" 
-              [(ngModel)]="couponCode" 
-              placeholder="Ingresa tu cupón"
-              [disabled]="appliedCoupon !== null"
-            >
-            <button 
-              *ngIf="!appliedCoupon" 
-              class="btn-apply-coupon" 
-              (click)="applyCoupon()"
-              [disabled]="!couponCode"
-            >
-              Aplicar
-            </button>
-            <button 
-              *ngIf="appliedCoupon" 
-              class="btn-remove-coupon" 
-              (click)="removeCoupon()"
-            >
-              Eliminar
+          
+          <!-- Available Coupons for registered users -->
+          <div *ngIf="currentUser && userCoupons.length > 0" class="available-coupons">
+            <p class="coupons-title">🎁 Tus cupones disponibles ({{ userCoupons.length }}):</p>
+            <div class="coupons-grid">
+              <div 
+                *ngFor="let coupon of userCoupons" 
+                class="coupon-card"
+                (click)="applyUserCoupon(coupon.coupon_code)">
+                <div class="coupon-card-header">
+                  <span class="coupon-card-icon">🎟️</span>
+                  <span class="coupon-card-amount">€{{ coupon.discount_amount }}</span>
+                </div>
+                <div class="coupon-card-code">{{ coupon.coupon_code }}</div>
+                <button class="btn-use-coupon">Usar Cupón</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Applied Coupons List -->
+          <div *ngIf="appliedCoupons.length > 0" class="applied-coupons-list">
+            <p class="applied-title">✓ Cupones aplicados:</p>
+            <div class="applied-coupons-items">
+              <div *ngFor="let coupon of appliedCoupons" class="applied-coupon-item">
+                <span class="applied-coupon-code">{{ coupon.code }}</span>
+                <span class="applied-coupon-amount">-€{{ coupon.amount }}</span>
+                <button class="btn-remove-applied" (click)="removeCoupon(coupon.code)">✖</button>
+              </div>
+            </div>
+            <button class="btn-clear-all-coupons" (click)="removeAllCoupons()">
+              Eliminar todos los cupones
             </button>
           </div>
-          <p *ngIf="appliedCoupon" class="coupon-applied">
-            ✓ Cupón {{ appliedCoupon }} aplicado
-          </p>
+
+          <!-- Manual coupon input -->
+          <div class="coupon-input-section">
+            <p class="input-label">Agregar otro cupón:</p>
+            <div class="coupon-input-group">
+              <input 
+                type="text" 
+                [(ngModel)]="couponCode" 
+                placeholder="Ingresa tu cupón"
+              >
+              <button 
+                class="btn-apply-coupon" 
+                (click)="applyCoupon()"
+                [disabled]="!couponCode"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Total Section -->
@@ -341,9 +367,9 @@
             <span>🎁 Descuento usuario (10%):</span>
             <span>-{{ cartDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
-          <div *ngIf="appliedCoupon" class="total-line discount">
-            <span>🎟️ Cupón {{ appliedCoupon }}:</span>
-            <span>-{{ couponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <div *ngIf="appliedCoupons.length > 0" class="total-line discount">
+            <span>🎟️ Cupones ({{ appliedCoupons.length }}):</span>
+            <span>-{{ totalCouponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
           <div class="total-line total">
             <span><strong>Total:</strong></span>
@@ -382,9 +408,9 @@
             <span>Descuento usuario:</span>
             <span>-{{ cartDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
-          <div *ngIf="appliedCoupon" class="summary-line discount">
-            <span>Cupón:</span>
-            <span>-{{ couponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <div *ngIf="appliedCoupons.length > 0" class="summary-line discount">
+            <span>Cupones ({{ appliedCoupons.length }}):</span>
+            <span>-{{ totalCouponDiscount | currency:'EUR':'symbol':'1.2-2' }}</span>
           </div>
           <div class="summary-line total">
             <span><strong>Total a pagar:</strong></span>

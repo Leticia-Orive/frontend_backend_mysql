@@ -39,8 +39,8 @@ export class HomeComponent implements OnInit {
   // Discounts and coupons
   userDiscount = 0.10; // 10% discount for registered users
   couponCode = '';
-  appliedCoupon: string | null = null;
-  couponDiscount = 0;
+  appliedCoupons: Array<{code: string, amount: number}> = [];
+  totalCouponDiscount = 0;
   userCoupons: any[] = [];
   showCouponsNotification = false;
   
@@ -266,13 +266,15 @@ export class HomeComponent implements OnInit {
       this.cartDiscount = 0;
     }
     
-    // Apply coupon discount
-    let couponAmount = 0;
-    if (this.appliedCoupon) {
-      couponAmount = this.couponDiscount;
-    }
+    // Apply multiple coupon discounts
+    this.totalCouponDiscount = this.appliedCoupons.reduce((sum, coupon) => sum + coupon.amount, 0);
     
-    this.cartTotal = this.cartSubtotal - this.cartDiscount - couponAmount;
+    this.cartTotal = this.cartSubtotal - this.cartDiscount - this.totalCouponDiscount;
+    
+    // Ensure total doesn't go negative
+    if (this.cartTotal < 0) {
+      this.cartTotal = 0;
+    }
   }
 
   saveCart(): void {
@@ -305,9 +307,20 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  applyUserCoupon(couponCode: string): void {
+    this.couponCode = couponCode;
+    this.applyCoupon();
+  }
+
   applyCoupon(): void {
     if (!this.couponCode.trim()) {
       alert('Por favor ingresa un código de cupón');
+      return;
+    }
+
+    // Check if coupon is already applied
+    if (this.appliedCoupons.some(c => c.code === this.couponCode.trim())) {
+      alert('Este cupón ya está aplicado');
       return;
     }
 
@@ -319,11 +332,14 @@ export class HomeComponent implements OnInit {
         // Usuario registrado usando su cupón personal
         this.couponService.useCoupon(this.couponCode).subscribe({
           next: (response) => {
-            this.appliedCoupon = this.couponCode;
-            this.couponDiscount = response.discount_amount;
+            this.appliedCoupons.push({
+              code: this.couponCode,
+              amount: response.discount_amount
+            });
             this.calculateTotal();
             this.loadUserCoupons(); // Recargar cupones
-            alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+            this.couponCode = '';
+            alert(`¡Cupón aplicado! Descuento de €${response.discount_amount}`);
           },
           error: (err) => {
             alert('Error al aplicar el cupón: ' + (err.error?.error || 'Cupón inválido'));
@@ -341,19 +357,26 @@ export class HomeComponent implements OnInit {
       const couponUpper = this.couponCode.toUpperCase();
       
       if (validCoupons[couponUpper]) {
-        this.appliedCoupon = couponUpper;
-        this.couponDiscount = validCoupons[couponUpper];
+        this.appliedCoupons.push({
+          code: couponUpper,
+          amount: validCoupons[couponUpper]
+        });
         this.calculateTotal();
-        alert(`¡Cupón aplicado! Descuento de €${this.couponDiscount}`);
+        this.couponCode = '';
+        alert(`¡Cupón aplicado! Descuento de €${validCoupons[couponUpper]}`);
       } else {
         alert('Cupón inválido');
       }
     }
   }
   
-  removeCoupon(): void {
-    this.appliedCoupon = null;
-    this.couponDiscount = 0;
+  removeCoupon(couponCode: string): void {
+    this.appliedCoupons = this.appliedCoupons.filter(c => c.code !== couponCode);
+    this.calculateTotal();
+  }
+  
+  removeAllCoupons(): void {
+    this.appliedCoupons = [];
     this.couponCode = '';
     this.calculateTotal();
   }
@@ -514,13 +537,15 @@ export class HomeComponent implements OnInit {
   
   processUserCheckout(): void {
     // Procesar compra y generar cupón
-    this.couponService.checkout(this.cartTotal, this.cartDiscount + this.couponDiscount, this.appliedCoupon).subscribe({
+    const couponsUsed = this.appliedCoupons.map(c => c.code).join(', ');
+    this.couponService.checkout(this.cartTotal, this.cartDiscount + this.totalCouponDiscount, couponsUsed || null).subscribe({
       next: (response) => {
         const pickupInfo = this.paymentMethod === 'efectivo' ? `\nPunto de recogida: ${this.pickupPoint}` : '';
-        const message = `¡Compra realizada exitosamente!\n\nMétodo de pago: ${this.getPaymentMethodName()}\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${this.appliedCoupon ? `Cupón ${this.appliedCoupon}: -€${this.couponDiscount.toFixed(2)}\n` : ''}Total pagado: €${this.cartTotal.toFixed(2)}${pickupInfo}\n\n🎁 ¡NUEVO CUPÓN GENERADO!\nCódigo: ${response.new_coupon.code}\nDescuento: €${response.new_coupon.amount}\n\n¡Úsalo en tu próxima compra!`;
+        const couponsInfo = this.appliedCoupons.length > 0 ? `Cupones aplicados: ${this.appliedCoupons.map(c => `${c.code} (-€${c.amount})`).join(', ')}\n` : '';
+        const message = `¡Compra realizada exitosamente!\n\nMétodo de pago: ${this.getPaymentMethodName()}\nSubtotal: €${this.cartSubtotal.toFixed(2)}\nDescuento de usuario (10%): -€${this.cartDiscount.toFixed(2)}\n${couponsInfo}Total pagado: €${this.cartTotal.toFixed(2)}${pickupInfo}\n\n🎁 ¡NUEVO CUPÓN GENERADO!\nCódigo: ${response.new_coupon.code}\nDescuento: €${response.new_coupon.amount}\n\n¡Úsalo en tu próxima compra!`;
         alert(message);
         this.clearCart();
-        this.removeCoupon();
+        this.removeAllCoupons();
         this.loadUserCoupons();
         this.closePaymentModal();
       },
