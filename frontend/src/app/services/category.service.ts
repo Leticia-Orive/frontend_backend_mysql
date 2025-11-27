@@ -11,11 +11,17 @@ export class CategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl);
+  getCategories(includeSubcategories: boolean = false): Observable<Category[]> {
+    const params = includeSubcategories ? '?include_subcategories=true' : '';
+    return this.http.get<Category[]>(`${this.apiUrl}${params}`);
   }
 
-  getCategory(id: number): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/${id}`);
+  getCategory(id: number, includeSubcategories: boolean = true): Observable<Category> {
+    const params = includeSubcategories ? '?include_subcategories=true' : '?include_subcategories=false';
+    return this.http.get<Category>(`${this.apiUrl}/${id}${params}`);
+  }
+
+  getSubcategories(categoryId: number): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.apiUrl}/${categoryId}/subcategories`);
   }
 }

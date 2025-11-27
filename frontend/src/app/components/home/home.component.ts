@@ -23,6 +23,7 @@ export class HomeComponent implements OnInit {
   loading = true;
   error: string | null = null;
   selectedCategory: number | null = null;
+  expandedSubcategories: { [key: number]: boolean } = {};
   
   // Product form
   showProductForm = false;
@@ -92,7 +93,7 @@ export class HomeComponent implements OnInit {
 
   loadCategories(): void {
     this.loading = true;
-    this.categoryService.getCategories().subscribe({
+    this.categoryService.getCategories(true).subscribe({
       next: (categories) => {
         this.categories = categories;
         this.loadAllProducts();
@@ -107,11 +108,20 @@ export class HomeComponent implements OnInit {
   loadAllProducts(): void {
     this.productService.getProducts().subscribe({
       next: (products) => {
-        // Agrupar productos por categoría
+        // Agrupar productos por categoría principal y subcategorías
         this.categories.forEach(category => {
           this.productsByCategory[category.id] = products.filter(
             p => p.category_id === category.id
           );
+          
+          // También cargar productos de subcategorías
+          if (category.subcategories && category.subcategories.length > 0) {
+            category.subcategories.forEach(subcat => {
+              this.productsByCategory[subcat.id] = products.filter(
+                p => p.category_id === subcat.id
+              );
+            });
+          }
         });
         this.loading = false;
       },
@@ -131,6 +141,14 @@ export class HomeComponent implements OnInit {
       return this.categories;
     }
     return this.categories.filter(c => c.id === this.selectedCategory);
+  }
+
+  toggleSubcategory(subcategoryId: number): void {
+    this.expandedSubcategories[subcategoryId] = !this.expandedSubcategories[subcategoryId];
+  }
+
+  isSubcategoryExpanded(subcategoryId: number): boolean {
+    return this.expandedSubcategories[subcategoryId] || false;
   }
 
   // Admin functions

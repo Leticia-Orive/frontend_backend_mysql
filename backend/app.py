@@ -319,34 +319,85 @@ def delete_user(user_id):
 
 # ============ ENDPOINTS DE CATEGORÍAS ============
 
-# Obtener todas las categorías
+# Obtener todas las categorías (con opción de incluir subcategorías)
 @app.route('/api/categories', methods=['GET'])
 def get_categories():
     try:
+        include_subcategories = request.args.get('include_subcategories', 'false').lower() == 'true'
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM categories ORDER BY name")
-        categories = cur.fetchall()
-        cur.close()
-        conn.close()
-        return jsonify(categories), 200
+        
+        if include_subcategories:
+            # Obtener todas las categorías
+            cur.execute("SELECT * FROM categories ORDER BY parent_id, name")
+            all_categories = cur.fetchall()
+            
+            # Organizar en estructura jerárquica
+            categories_dict = {}
+            root_categories = []
+            
+            for cat in all_categories:
+                categories_dict[cat['id']] = {**cat, 'subcategories': []}
+                
+            for cat in all_categories:
+                if cat['parent_id'] is None:
+                    root_categories.append(categories_dict[cat['id']])
+                else:
+                    parent = categories_dict.get(cat['parent_id'])
+                    if parent:
+                        parent['subcategories'].append(categories_dict[cat['id']])
+            
+            cur.close()
+            conn.close()
+            return jsonify(root_categories), 200
+        else:
+            # Obtener solo categorías principales
+            cur.execute("SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name")
+            categories = cur.fetchall()
+            cur.close()
+            conn.close()
+            return jsonify(categories), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Obtener una categoría por ID
+# Obtener una categoría por ID (con sus subcategorías)
 @app.route('/api/categories/<int:category_id>', methods=['GET'])
 def get_category(category_id):
     try:
+        include_subcategories = request.args.get('include_subcategories', 'true').lower() == 'true'
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT * FROM categories WHERE id = %s", (category_id,))
         category = cur.fetchone()
+        
+        if not category:
+            cur.close()
+            conn.close()
+            return jsonify({'error': 'Categoría no encontrada'}), 404
+        
+        if include_subcategories:
+            # Obtener subcategorías
+            cur.execute("SELECT * FROM categories WHERE parent_id = %s ORDER BY name", (category_id,))
+            subcategories = cur.fetchall()
+            category['subcategories'] = subcategories
+        
         cur.close()
         conn.close()
-        
-        if category:
-            return jsonify(category), 200
-        return jsonify({'error': 'Categoría no encontrada'}), 404
+        return jsonify(category), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Obtener subcategorías de una categoría
+@app.route('/api/categories/<int:category_id>/subcategories', methods=['GET'])
+def get_subcategories(category_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM categories WHERE parent_id = %s ORDER BY name", (category_id,))
+        subcategories = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(subcategories), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

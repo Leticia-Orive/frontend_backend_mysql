@@ -28,11 +28,14 @@ INSERT INTO users (name, email, password, role) VALUES
 -- Crear tabla de categorías
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
     description TEXT,
     image_url VARCHAR(255),
+    parent_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_category_name (name, parent_id)
 );
 
 -- Crear tabla de productos
@@ -49,14 +52,21 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
--- Insertar categorías de ejemplo
-INSERT INTO categories (name, description, image_url) VALUES
-('Electrónica', 'Dispositivos electrónicos y gadgets', 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400'),
-('Ropa', 'Ropa y accesorios de moda', 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400'),
-('Hogar', 'Artículos para el hogar y decoración', 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400'),
-('Deportes', 'Equipamiento deportivo y fitness', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400'),
-('Libros', 'Libros y material educativo', 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400'),
-('Juguetes', 'Juguetes y entretenimiento infantil', 'https://images.unsplash.com/photo-1560582861-45078880e48e?w=400');
+-- Insertar categorías principales
+INSERT INTO categories (name, description, image_url, parent_id) VALUES
+('Electrónica', 'Dispositivos electrónicos y gadgets', 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400', NULL),
+('Ropa', 'Ropa y accesorios de moda', 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400', NULL),
+('Hogar', 'Artículos para el hogar y decoración', 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400', NULL),
+('Deportes', 'Equipamiento deportivo y fitness', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400', NULL),
+('Libros', 'Libros y material educativo', 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400', NULL),
+('Juguetes', 'Juguetes y entretenimiento infantil', 'https://images.unsplash.com/photo-1560582861-45078880e48e?w=400', NULL),
+('Mascotas', 'Todo para tus mascotas', 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400', NULL);
+
+-- Insertar subcategorías de Mascotas
+INSERT INTO categories (name, description, image_url, parent_id) VALUES
+('Complementos', 'Accesorios y complementos para mascotas', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400', 7),
+('Alimentación', 'Comida y snacks para mascotas', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400', 7),
+('Animales', 'Mascotas en venta', 'https://images.unsplash.com/photo-1415369629372-26f2fe60c467?w=400', 7);
 
 -- Insertar productos de ejemplo
 INSERT INTO products (name, description, price, stock, image_url, category_id) VALUES
@@ -94,4 +104,28 @@ INSERT INTO products (name, description, price, stock, image_url, category_id) V
 ('LEGO Ciudad', 'Set de construcción LEGO con 500 piezas', 59.99, 25, 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400', 6),
 ('Muñeca Interactiva', 'Muñeca que habla y canta', 44.99, 30, 'https://images.unsplash.com/photo-1572375992501-4b0892d50c69?w=400', 6),
 ('Rompecabezas 1000 piezas', 'Rompecabezas de paisaje natural', 19.99, 45, 'https://images.unsplash.com/photo-1586943759442-3f0b45f3f31e?w=400', 6),
-('Coche Teledirigido', 'Coche RC con control remoto', 79.99, 18, 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400', 6);
+('Coche Teledirigido', 'Coche RC con control remoto', 79.99, 18, 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400', 6),
+
+-- Mascotas - Complementos
+('Collar para Perro', 'Collar ajustable de nylon resistente', 12.99, 50, 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400', 8),
+('Correa Extensible', 'Correa retráctil de 5 metros', 24.99, 35, 'https://images.unsplash.com/photo-1583511655826-05700d3f5501?w=400', 8),
+('Cama para Gato', 'Cama suave y cómoda para gatos', 34.99, 25, 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400', 8),
+('Juguete Pelota', 'Pelota de goma para perros', 8.99, 80, 'https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=400', 8),
+('Transportín', 'Transportín para gatos y perros pequeños', 49.99, 20, 'https://images.unsplash.com/photo-1544306094-e2dcf9479da3?w=400', 8),
+('Rascador para Gatos', 'Rascador de sisal con plataforma', 39.99, 30, 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=400', 8),
+
+-- Mascotas - Alimentación
+('Pienso para Perros', 'Alimento seco premium para perros adultos 10kg', 45.99, 40, 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400', 9),
+('Comida para Gatos', 'Alimento húmedo para gatos variedad pack 12 latas', 18.99, 60, 'https://images.unsplash.com/photo-1579158620246-c571a5f4e4e7?w=400', 9),
+('Snacks Dentales', 'Premios dentales para perros', 9.99, 70, 'https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?w=400', 9),
+('Golosinas para Gatos', 'Snacks crujientes para gatos sabor pollo', 6.99, 55, 'https://images.unsplash.com/photo-1516750342352-817451a4a07e?w=400', 9),
+('Comida para Pájaros', 'Mezcla de semillas para pájaros 2kg', 14.99, 45, 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400', 9),
+('Alimento para Peces', 'Escamas nutritivas para peces tropicales', 7.99, 65, 'https://images.unsplash.com/photo-1520990269481-36c4c03da56b?w=400', 9),
+
+-- Mascotas - Animales
+('Cachorro Golden Retriever', 'Cachorro golden retriever de 2 meses', 800.00, 2, 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400', 10),
+('Gatito Persa', 'Gatito persa de 3 meses', 600.00, 3, 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400', 10),
+('Hámster Dorado', 'Hámster dorado adulto', 15.00, 10, 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=400', 10),
+('Canario Amarillo', 'Canario amarillo cantarín', 45.00, 8, 'https://images.unsplash.com/photo-1582142306909-195724d33d9e?w=400', 10),
+('Pez Betta', 'Pez betta de colores variados', 12.00, 15, 'https://images.unsplash.com/photo-1520990269481-36c4c03da56b?w=400', 10),
+('Conejo Enano', 'Conejo enano holandés', 75.00, 5, 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=400', 10);
