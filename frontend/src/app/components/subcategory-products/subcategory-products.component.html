@@ -1,0 +1,82 @@
+<div class="subcategory-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <button class="btn-back" (click)="goBack()">
+        ← Volver
+      </button>
+      <h1>🛒 Tienda Online</h1>
+      <div class="header-actions">
+        <button class="btn-contact" routerLink="/contact">
+          📧 Contacto
+        </button>
+        
+        <div *ngIf="!currentUser" class="auth-buttons">
+          <button class="btn-login" routerLink="/login">
+            🔐 Iniciar Sesión
+          </button>
+        </div>
+        
+        <div *ngIf="currentUser" class="user-section">
+          <span class="welcome-text">
+            Hola, {{ currentUser.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subcategory Header -->
+  <div *ngIf="subcategory" class="subcategory-header">
+    <img [src]="subcategory.image_url" [alt]="subcategory.name" class="subcategory-image">
+    <div class="subcategory-info">
+      <h2>{{ subcategory.name }}</h2>
+      <p>{{ subcategory.description }}</p>
+      <span class="product-count">{{ products.length }} productos disponibles</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && !error" class="products-container">
+    <div *ngIf="products.length === 0" class="no-products">
+      No hay productos disponibles en esta categoría
+    </div>
+
+    <div *ngIf="products.length > 0" class="products-grid">
+      <div *ngFor="let product of products" class="product-card">
+        <div class="product-image-container">
+          <img [src]="product.image_url" [alt]="product.name" class="product-image">
+          <span *ngIf="product.stock === 0" class="out-of-stock">Agotado</span>
+          <span *ngIf="product.stock > 0 && product.stock < 10" class="low-stock">Últimas unidades</span>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <p class="product-description">{{ product.description }}</p>
+          <div class="product-footer">
+            <span class="product-price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+            <span class="product-stock">Stock: {{ product.stock }}</span>
+          </div>
+          
+          <button 
+            class="btn-add-cart" 
+            [disabled]="product.stock === 0"
+            [class.disabled]="product.stock === 0"
+            (click)="addToCart(product)">
+            {{ product.stock === 0 ? 'Agotado' : '🛒 Añadir al Carrito' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

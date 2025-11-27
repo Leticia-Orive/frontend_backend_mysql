@@ -4,12 +4,14 @@ import { RegisterComponent } from './components/register/register.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { HomeComponent } from './components/home/home.component';
 import { ContactComponent } from './components/contact/contact.component';
+import { SubcategoryProductsComponent } from './components/subcategory-products/subcategory-products.component';
 import { authGuard, adminGuard, loginGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'contact', component: ContactComponent },
+  { path: 'subcategory/:id', component: SubcategoryProductsComponent },
   { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [loginGuard] },
   { path: 'users', component: UserListComponent, canActivate: [adminGuard] },

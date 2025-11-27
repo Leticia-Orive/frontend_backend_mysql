@@ -153,10 +153,13 @@
         </div>
       </div>
 
-      <!-- Subcategorías y sus productos -->
+      <!-- Subcategorías -->
       <div *ngIf="category.subcategories && category.subcategories.length > 0" class="subcategories-container">
-        <div *ngFor="let subcategory of category.subcategories" class="subcategory-section">
-          <div class="subcategory-header" (click)="toggleSubcategory(subcategory.id)">
+        <h3 class="subcategories-title">Categorías disponibles</h3>
+        <div class="subcategories-grid">
+          <a *ngFor="let subcategory of category.subcategories" 
+             [routerLink]="['/subcategory', subcategory.id]"
+             class="subcategory-card">
             <img [src]="subcategory.image_url" [alt]="subcategory.name" class="subcategory-image">
             <div class="subcategory-info">
               <h3>{{ subcategory.name }}</h3>
@@ -165,57 +168,8 @@
                 {{ productsByCategory[subcategory.id]?.length || 0 }} productos
               </span>
             </div>
-            <div class="expand-icon">
-              {{ isSubcategoryExpanded(subcategory.id) ? '▼' : '▶' }}
-            </div>
-          </div>
-
-          <div *ngIf="isSubcategoryExpanded(subcategory.id)" class="subcategory-content">
-            <div *ngIf="productsByCategory[subcategory.id]?.length === 0" class="no-products">
-              No hay productos en esta subcategoría
-            </div>
-
-            <div *ngIf="productsByCategory[subcategory.id] && productsByCategory[subcategory.id].length > 0" class="products-grid">
-            <div *ngFor="let product of productsByCategory[subcategory.id]" class="product-card">
-              <div class="product-image-container">
-                <img [src]="product.image_url" [alt]="product.name" class="product-image">
-                <span *ngIf="product.stock === 0" class="out-of-stock">Agotado</span>
-                <span *ngIf="product.stock > 0 && product.stock < 10" class="low-stock">Últimas unidades</span>
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-description">{{ product.description }}</p>
-                <div class="product-footer">
-                  <span class="product-price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</span>
-                  <span class="product-stock">Stock: {{ product.stock }}</span>
-                </div>
-                
-                <div *ngIf="isAdmin()" class="admin-buttons">
-                  <button class="btn-edit" (click)="openEditProductForm(product)">
-                    ✏️ Editar
-                  </button>
-                  <button class="btn-delete" (click)="deleteProduct(product)">
-                    🗑️ Eliminar
-                  </button>
-                </div>
-                
-                <div *ngIf="currentUser && !isAdmin()" class="user-buttons">
-                  <button class="btn-view-product" (click)="viewProduct(product)">
-                    👁️ Ver Producto
-                  </button>
-                </div>
-                
-                <button 
-                  class="btn-add-cart" 
-                  [disabled]="product.stock === 0"
-                  [class.disabled]="product.stock === 0"
-                  (click)="addToCart(product)">
-                  {{ product.stock === 0 ? 'Agotado' : '🛒 Añadir al Carrito' }}
-                </button>
-              </div>
-            </div>
-          </div>
-          </div>
+            <div class="arrow-icon">→</div>
+          </a>
         </div>
       </div>
     </div>

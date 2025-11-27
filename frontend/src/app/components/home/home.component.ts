@@ -23,7 +23,6 @@ export class HomeComponent implements OnInit {
   loading = true;
   error: string | null = null;
   selectedCategory: number | null = null;
-  expandedSubcategories: { [key: number]: boolean } = {};
   
   // Product form
   showProductForm = false;
@@ -141,14 +140,6 @@ export class HomeComponent implements OnInit {
       return this.categories;
     }
     return this.categories.filter(c => c.id === this.selectedCategory);
-  }
-
-  toggleSubcategory(subcategoryId: number): void {
-    this.expandedSubcategories[subcategoryId] = !this.expandedSubcategories[subcategoryId];
-  }
-
-  isSubcategoryExpanded(subcategoryId: number): boolean {
-    return this.expandedSubcategories[subcategoryId] || false;
   }
 
   // Admin functions
