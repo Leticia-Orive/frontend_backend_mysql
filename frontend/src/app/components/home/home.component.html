@@ -60,19 +60,21 @@
 
   <!-- Category Filter -->
   <div class="category-filter">
-    <button 
-      class="filter-btn" 
-      [class.active]="selectedCategory === null"
-      (click)="filterByCategory(null)">
-      Todas
-    </button>
-    <button 
-      *ngFor="let category of categories"
-      class="filter-btn" 
-      [class.active]="selectedCategory === category.id"
-      (click)="filterByCategory(category.id)">
-      {{ category.name }}
-    </button>
+    <div class="filter-select-wrapper">
+      <label for="categorySelect">Selecciona una categoría:</label>
+      <select 
+        id="categorySelect"
+        class="filter-select" 
+        [(ngModel)]="selectedCategory"
+        (change)="onCategoryChange()">
+        <option [ngValue]="null">📦 Todas las categorías</option>
+        <option 
+          *ngFor="let category of categories" 
+          [ngValue]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
   </div>
 
   <!-- Loading -->

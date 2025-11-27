@@ -135,11 +135,19 @@ export class HomeComponent implements OnInit {
     this.selectedCategory = categoryId;
   }
 
+  onCategoryChange(): void {
+    // Convertir a número si no es null
+    if (this.selectedCategory !== null && this.selectedCategory !== undefined) {
+      this.selectedCategory = Number(this.selectedCategory);
+    }
+  }
+
   getFilteredCategories(): Category[] {
-    if (this.selectedCategory === null) {
+    if (this.selectedCategory === null || this.selectedCategory === undefined) {
       return this.categories;
     }
-    return this.categories.filter(c => c.id === this.selectedCategory);
+    const catId = Number(this.selectedCategory);
+    return this.categories.filter(c => c.id === catId);
   }
 
   // Admin functions

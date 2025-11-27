@@ -262,33 +262,59 @@
 /* Category Filter */
 .category-filter {
   max-width: 1400px;
-  margin: 20px auto;
+  margin: 30px auto;
   padding: 0 20px;
   display: flex;
+  justify-content: center;
+}
+
+.filter-select-wrapper {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  flex-wrap: wrap;
-  overflow-x: auto;
+  width: 100%;
+  max-width: 500px;
 }
 
-.filter-btn {
-  background: white;
-  color: #667eea;
+.filter-select-wrapper label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1rem;
   border: 2px solid #667eea;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 0.95rem;
+  border-radius: 12px;
+  background: white;
+  color: #333;
   cursor: pointer;
-  transition: all 0.3s;
-  white-space: nowrap;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-.filter-btn:hover {
-  background: #f0f0f0;
+.filter-select:hover {
+  border-color: #764ba2;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
-.filter-btn.active {
-  background: #667eea;
-  color: white;
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.filter-select option {
+  padding: 10px;
+  font-size: 1rem;
 }
 
 /* Loading */
@@ -1371,6 +1397,19 @@
 
   .category-filter {
     padding: 0 10px;
+  }
+
+  .filter-select-wrapper {
+    max-width: 100%;
+  }
+
+  .filter-select-wrapper label {
+    font-size: 1rem;
+  }
+
+  .filter-select {
+    font-size: 0.95rem;
+    padding: 12px 15px;
   }
 
   .cart-item {
